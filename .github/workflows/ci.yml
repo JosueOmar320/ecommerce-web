@@ -48,7 +48,7 @@ jobs:
           VITE_API_URL: https://api.example.com
           VITE_SITE_URL: https://shop.example.com
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage
@@ -113,7 +113,7 @@ jobs:
           # Seeds through the API image: wipes and reloads the deterministic dataset.
           E2E_SEED_COMMAND: ${{ env.COMPOSE }} --profile seed run --rm seed
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report
