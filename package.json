@@ -18,7 +18,8 @@
     "api:generate": "openapi-typescript openapi/openapi.json -o src/api/schema.ts --root-types --root-types-no-schema-prefix",
     "api:check": "npm run api:generate && git diff --exit-code -- src/api/schema.ts",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "screenshots": "node scripts/capture-screenshots.mjs"
   },
   "author": "Josue Omar",
   "license": "UNLICENSED",

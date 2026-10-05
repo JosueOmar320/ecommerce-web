@@ -15,6 +15,8 @@ the server that explains price and stock changes, a checkout that cannot charge 
 asynchronous payment that the UI follows until the webhook lands, an admin where every action is
 permission-aware, and accessibility verified in a real browser in both colour schemes.
 
+![Kestrel storefront](docs/screenshots/03-catalog-filters.png)
+
 ---
 
 ## Contents
@@ -32,7 +34,7 @@ permission-aware, and accessibility verified in a real browser in both colour sc
 - [CI/CD](#cicd)
 - [Project structure](#project-structure)
 - [API gaps and how the UI handles them](#api-gaps-and-how-the-ui-handles-them)
-- [Screenshot plan](#screenshot-plan)
+- [Screenshots](#screenshots)
 - [Future improvements](#future-improvements)
 
 ## Highlights
@@ -349,21 +351,38 @@ The UI only uses endpoints that exist. Where the API has no data, the app shows 
 | Deleting a product removes it from admin lists too            | The UI calls it "Delete" and points to the Draft/Archived statuses for hiding a product temporarily          |
 | Order status notes are free text from whoever made the change | Shown as written (system notes are in English)                                                               |
 
-## Screenshot plan
+## Screenshots
 
-Captures to add under `docs/screenshots/`, taken against the seeded API (1440×900 desktop,
-390×844 phone), in English, light mode unless noted:
+Captured from the production build against a freshly seeded API (real data, nothing staged in the
+UI). Desktop shots are 1440×900, phone shots 390×844.
 
-1. Home (desktop) and Home (dark mode)
-2. Catalog with a category, price range and sort applied, URL visible
-3. Product page with a variant selected and an out-of-stock option
-4. Cart showing a price-change notice and a stock issue
-5. Checkout payment step (test mode, declined then retry) and the confirmation
-6. Order detail with progress, payments and the invoice dialog
-7. Profile address book (phone)
-8. Admin dashboard, product editor with variants, inventory drawer with the ledger
-9. Admin order detail with status actions; users table on a phone
-10. Spanish UI (catalog) to show the language switch
+|                                                                                                                                     |                                                                                                                            |
+| ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| ![Home](docs/screenshots/01-home.png) **Home**                                                                                      | ![Home in dark mode](docs/screenshots/02-home-dark.png) **Home, dark mode**                                                |
+| ![Catalog with filters](docs/screenshots/03-catalog-filters.png) **Catalog:** category, price range and sort, all in the URL        | ![Product page](docs/screenshots/04-product-variants.png) **Product page:** sold-out options struck through                |
+| ![Cart notices](docs/screenshots/05-cart-notices.png) **Cart:** price change since added, and a stock conflict that blocks checkout | ![Payment step](docs/screenshots/06-checkout-payment.png) **Payment (test mode):** a declined card, ready to retry         |
+| ![Confirmation](docs/screenshots/07-checkout-confirmation.png) **Confirmation** after the provider's webhook                        | ![Order detail](docs/screenshots/08-order-detail.png) **Order detail:** progress, both payment attempts                    |
+| ![Invoice](docs/screenshots/09-invoice.png) **Invoice** (print / save as PDF)                                                       | ![Admin dashboard](docs/screenshots/11-admin-dashboard.png) **Admin dashboard:** exact counts from the API                 |
+| ![Product editor](docs/screenshots/12-admin-product-editor.png) **Product editor:** variants with live availability                 | ![Inventory ledger](docs/screenshots/13-admin-inventory-ledger.png) **Inventory:** per-variant ledger and manual movements |
+| ![Admin order detail](docs/screenshots/14-admin-order-detail.png) **Admin order:** only the transitions the API allows              | ![Spanish catalog](docs/screenshots/16-catalog-es.png) **Spanish UI** (category names are catalog data from the API)       |
+
+<p>
+  <img src="docs/screenshots/10-profile-addresses-phone.png" alt="Address book on a phone" width="260" />
+  &nbsp;
+  <img src="docs/screenshots/15-admin-users-phone.png" alt="Admin users table on a phone" width="260" />
+</p>
+
+**Phone:** the address book and the admin users table at 390 px.
+
+To regenerate them after UI changes (this re-seeds the API's database):
+
+```bash
+npm run build && npm run preview
+```
+
+```bash
+npm run screenshots
+```
 
 ## Future improvements
 
