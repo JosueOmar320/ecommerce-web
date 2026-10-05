@@ -6,8 +6,20 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#111111" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>Northwind Supply</title>
-    <meta name="description" content="Northwind Supply: electronics, home and apparel." />
+    <title>Kestrel</title>
+    <script>
+      // Apply the saved (or system) colour scheme before first paint to avoid a light flash.
+      (function () {
+        try {
+          var mode = localStorage.getItem('kestrel.theme') || 'system';
+          var dark =
+            mode === 'dark' ||
+            (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-color-scheme', dark ? 'dark' : 'light');
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="description" content="Kestrel: electronics, home and apparel, chosen with care." />
   </head>
   <body>
     <div id="root"></div>

@@ -18,6 +18,9 @@ export default defineConfig(({ command, mode }) => {
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },
+    // Scan every source file up front: lazy routes otherwise reveal new dependencies late, which
+    // makes the dev server re-optimize mid-session and serve two copies of React.
+    optimizeDeps: { entries: ['index.html', 'src/**/*.{ts,tsx}'] },
     server: { port: 5173, strictPort: true },
     preview: { port: 4173, strictPort: true },
     test: {
