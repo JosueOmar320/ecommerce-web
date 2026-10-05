@@ -27,6 +27,9 @@ export function useProductFilters(fixed: Partial<ProductFilters> = {}) {
       setParams(serializeFilters(next), {
         replace: options.replace ?? false,
         preventScrollReset: true,
+        // Discrete choices (radios, selects) render synchronously: inside a transition a
+        // controlled radio snaps back to its old value until the navigation commits.
+        flushSync: !options.replace,
       });
     },
     [fromUrl, fixed, setParams],

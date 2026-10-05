@@ -16,7 +16,9 @@
     "test:coverage": "vitest run --coverage",
     "api:sync": "node scripts/sync-openapi.mjs",
     "api:generate": "openapi-typescript openapi/openapi.json -o src/api/schema.ts --root-types --root-types-no-schema-prefix",
-    "api:check": "npm run api:generate && git diff --exit-code -- src/api/schema.ts"
+    "api:check": "npm run api:generate && git diff --exit-code -- src/api/schema.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "author": "Josue Omar",
   "license": "UNLICENSED",
@@ -39,7 +41,9 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.63.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",

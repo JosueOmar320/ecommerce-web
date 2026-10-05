@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { RouterProvider } from 'react-router';
+// The DOM build of RouterProvider supports flushSync navigations (used by URL filters).
+import { RouterProvider } from 'react-router/dom';
 import { AppProviders } from './AppProviders';
 import { createQueryClient } from './queryClient';
 import { createAppRouter } from './router';

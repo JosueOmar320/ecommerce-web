@@ -47,5 +47,11 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
     rules: { 'no-console': 'off' },
   },
+  {
+    // Playwright: fixtures receive a `use` callback that is not React's hook; setup logs progress.
+    files: ['e2e/**', 'playwright.config.ts'],
+    languageOptions: { globals: globals.node },
+    rules: { 'react-hooks/rules-of-hooks': 'off', 'no-console': 'off' },
+  },
   prettier,
 );

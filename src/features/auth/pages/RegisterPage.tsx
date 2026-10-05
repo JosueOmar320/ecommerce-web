@@ -71,6 +71,8 @@ export function RegisterPage() {
         <Typography color="textSecondary">
           {t('auth.haveAccount')}{' '}
           <AppLink
+            // Inside a sentence: underlined so it is not identified by colour alone (WCAG 1.4.1).
+            underline="always"
             to={`/login${params.get('redirect') ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}
           >
             {t('auth.signInTitle')}

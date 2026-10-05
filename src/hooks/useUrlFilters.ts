@@ -27,7 +27,12 @@ export function useUrlFilters<S extends z.ZodType<Filters & { page?: number }>>(
         if (value === undefined || value === '' || (key === 'page' && value === 1)) continue;
         next.set(key, String(value));
       }
-      setParams(next, { replace: options.replace ?? false, preventScrollReset: true });
+      // Discrete choices render synchronously (see useProductFilters); typing stays a transition.
+      setParams(next, {
+        replace: options.replace ?? false,
+        preventScrollReset: true,
+        flushSync: !options.replace,
+      });
     },
     [filters, setParams],
   );
