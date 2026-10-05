@@ -17,6 +17,9 @@ function useCartMutation<TVariables>(mutationFn: (variables: TVariables) => Prom
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
+    // Cart mutations run one at a time: each response is the full cart, so an older response
+    // arriving after a newer one would otherwise overwrite fresher data.
+    scope: { id: 'cart' },
     onSuccess: (cart) => {
       queryClient.setQueryData(cartKeys.all, cart);
     },
@@ -47,6 +50,17 @@ export function useUpdateCartItem() {
         )
       ).data,
   );
+}
+
+export function useClearCart() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      await unwrap(api.DELETE('/api/v1/cart'));
+    },
+    scope: { id: 'cart' },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: cartKeys.all }),
+  });
 }
 
 export function useRemoveCartItem() {
