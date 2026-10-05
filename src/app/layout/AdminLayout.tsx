@@ -17,8 +17,9 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, Outlet, Link as RouterLink, ScrollRestoration } from 'react-router';
+import { NavLink, Outlet, Link as RouterLink } from 'react-router';
 import { MAIN_CONTENT_ID, SkipLink } from '@/components/SkipLink';
+import { AppScrollRestoration } from './AppScrollRestoration';
 import { NavigationProgress } from './NavigationProgress';
 import { PreferencesMenu } from './PreferencesMenu';
 
@@ -156,7 +157,7 @@ export function AdminLayout() {
           <Outlet />
         </Box>
       </Box>
-      <ScrollRestoration />
+      <AppScrollRestoration />
     </Box>
   );
 }

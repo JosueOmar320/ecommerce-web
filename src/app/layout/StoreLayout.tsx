@@ -1,8 +1,9 @@
 import Box from '@mui/material/Box';
-import { Outlet, ScrollRestoration } from 'react-router';
+import { Outlet } from 'react-router';
 import { MAIN_CONTENT_ID, SkipLink } from '@/components/SkipLink';
 import { Footer } from './Footer';
 import { Header } from './Header';
+import { AppScrollRestoration } from './AppScrollRestoration';
 import { NavigationProgress } from './NavigationProgress';
 
 export function StoreLayout() {
@@ -20,7 +21,7 @@ export function StoreLayout() {
         <Outlet />
       </Box>
       <Footer />
-      <ScrollRestoration />
+      <AppScrollRestoration />
     </Box>
   );
 }

@@ -10,9 +10,11 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
+import { useQuery } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Link as RouterLink } from 'react-router';
+import { categoriesQuery } from '@/features/catalog/api';
 import { layout } from '@/theme/theme';
 import { AccountMenu } from './AccountMenu';
 import { Logo } from './Logo';
@@ -32,6 +34,7 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
+  const categories = useQuery(categoriesQuery);
 
   return (
     <AppBar
@@ -69,9 +72,19 @@ export function Header() {
           aria-label={t('nav.mainNavigation')}
           sx={{ display: { xs: 'none', md: 'flex' } }}
         >
-          <Button component={NavLink} to="/products" sx={navLinkSx}>
+          <Button component={NavLink} to="/products" end sx={navLinkSx}>
             {t('nav.shop')}
           </Button>
+          {categories.data?.map((category) => (
+            <Button
+              key={category.id}
+              component={NavLink}
+              to={`/categories/${category.slug}`}
+              sx={navLinkSx}
+            >
+              {category.name}
+            </Button>
+          ))}
         </Box>
 
         <Box sx={{ flex: 1, display: { xs: 'none', md: 'flex' }, maxWidth: 440, ml: 'auto' }}>

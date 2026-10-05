@@ -6,7 +6,9 @@ import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { categoriesQuery } from '@/features/catalog/api';
 import { NavLink, useNavigate } from 'react-router';
 import { ADMIN_AREA_PERMISSIONS } from '@/features/auth/permissions';
 import { useSession } from '@/features/auth/session';
@@ -24,9 +26,14 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
   const navigate = useNavigate();
   const { status, user, hasPermission, logout } = useSession();
   const signedIn = status === 'authenticated';
-  const links = [
+  const categories = useQuery(categoriesQuery);
+  const links: { to: string; label: string; end?: boolean }[] = [
     { to: '/', label: t('nav.home'), end: true },
     { to: '/products', label: t('nav.allProducts') },
+    ...(categories.data ?? []).map((category) => ({
+      to: `/categories/${category.slug}`,
+      label: category.name,
+    })),
     { to: '/wishlist', label: t('nav.wishlist') },
     { to: '/cart', label: t('nav.cart') },
     ...(signedIn

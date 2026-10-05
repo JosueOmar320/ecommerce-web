@@ -42,7 +42,11 @@ describe('store layout', () => {
 
   it('has no detectable accessibility violations', async () => {
     const { container } = renderApp();
-    await screen.findByRole('heading', { level: 1, name: 'Home' });
+    await screen.findByRole('heading', {
+      level: 1,
+      name: 'Well-made things for the way you live.',
+    });
+    await screen.findByRole('link', { name: 'Nimbus X Phone' });
     await expectNoAxeViolations(container);
   });
 });
