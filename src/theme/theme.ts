@@ -11,6 +11,13 @@ const accent = { light: '#0e5a4b', dark: '#5cc6ab' };
 
 const fontFamily = '"Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", sans-serif';
 
+/** Shared layout widths so pages align with the header and footer. */
+export const layout = {
+  maxWidth: 1320,
+  gutter: { xs: 2, sm: 3, md: 4 },
+  headerHeight: 64,
+} as const;
+
 const shared: ThemeOptions = {
   shape: { borderRadius: 4 },
   spacing: 8,
@@ -42,9 +49,30 @@ const shared: ThemeOptions = {
   components: {
     // Gap instead of child margins: wrapped rows stay aligned (no stray offset on the new line).
     MuiStack: { defaultProps: { useFlexGap: true } },
+    // MUI renders subtitles as <h6> by default, which invents headings in the outline.
+    MuiTypography: {
+      defaultProps: {
+        variantMapping: {
+          h1: 'h1',
+          h2: 'h2',
+          h3: 'h3',
+          h4: 'h4',
+          h5: 'h5',
+          h6: 'h6',
+          subtitle1: 'p',
+          subtitle2: 'p',
+          body1: 'p',
+          body2: 'p',
+          inherit: 'p',
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         'html, body, #root': { minHeight: '100%' },
+        // The storefront header is sticky: keep keyboard-focused and anchored elements out from
+        // under it (WCAG 2.4.11 Focus Not Obscured).
+        html: { scrollPaddingTop: layout.headerHeight + 16 },
         body: { WebkitFontSmoothing: 'antialiased', fontFeatureSettings: '"cv11", "ss01"' },
         // Visible, consistent keyboard focus everywhere (WCAG 2.4.7 / 2.4.13).
         ':focus-visible': {
@@ -114,10 +142,3 @@ export const theme = createTheme({
     },
   },
 });
-
-/** Shared layout widths so pages align with the header and footer. */
-export const layout = {
-  maxWidth: 1320,
-  gutter: { xs: 2, sm: 3, md: 4 },
-  headerHeight: 64,
-} as const;

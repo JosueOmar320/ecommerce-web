@@ -1,53 +1,61 @@
-import { z } from 'zod';
-
 export const SORTS = ['relevance', 'newest', 'price_asc', 'price_desc', 'name_asc'] as const;
 export type Sort = (typeof SORTS)[number];
+export const AVAILABILITIES = ['in_stock', 'out_of_stock'] as const;
 export const PAGE_SIZE = 24; // divisible by 2, 3 and 4 columns
 
-const optionalText = z
-  .string()
-  .trim()
-  .max(100)
-  .optional()
-  .transform((v) => (v ? v : undefined));
+export interface ProductFilters {
+  search?: string;
+  category?: string;
+  brand?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  availability?: (typeof AVAILABILITIES)[number];
+  sort?: Sort;
+  page?: number;
+}
 
+/*
+ * Small hand-written parsers instead of a schema library: this module is on the storefront's
+ * initial path (header and catalog), where every kilobyte counts.
+ */
+const text = (value: string | null) => {
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length <= 100 ? trimmed : undefined;
+};
+const matching = (value: string | null, pattern: RegExp) =>
+  value !== null && pattern.test(value) ? value : undefined;
+const oneOf = <T extends string>(value: string | null, options: readonly T[]) =>
+  options.find((option) => option === value);
+
+const SLUG = /^(?=.{1,120}$)[a-z0-9]+(?:-[a-z0-9]+)*$/;
 /** Same rule as the API: major units with at most two decimals (e.g. "499.99"). */
-const money = z
-  .string()
-  .regex(/^\d{1,9}(\.\d{1,2})?$/)
-  .optional()
-  .catch(undefined);
+const MONEY = /^\d{1,9}(\.\d{1,2})?$/;
 
 /**
- * Products filters as they live in the URL. Every value is validated: anything malformed or
+ * Product filters as they live in the URL. Every value is validated: anything malformed or
  * hand-edited is dropped instead of being forwarded to the API (or crashing the page).
  */
-export const productFiltersSchema = z.object({
-  search: optionalText.catch(undefined),
-  category: z
-    .string()
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-    .max(120)
-    .optional()
-    .catch(undefined),
-  brand: optionalText.catch(undefined),
-  minPrice: money,
-  maxPrice: money,
-  availability: z.enum(['in_stock', 'out_of_stock']).optional().catch(undefined),
-  sort: z.enum(SORTS).optional().catch(undefined),
-  page: z.coerce.number().int().min(1).max(10_000).optional().catch(undefined),
-});
-
-export type ProductFilters = Partial<z.infer<typeof productFiltersSchema>>;
-
 export function parseFilters(params: URLSearchParams): ProductFilters {
-  const filters = productFiltersSchema.parse(Object.fromEntries(params));
+  const page = Number(params.get('page'));
+  const filters: ProductFilters = {
+    search: text(params.get('search')),
+    category: matching(params.get('category'), SLUG),
+    brand: text(params.get('brand')),
+    minPrice: matching(params.get('minPrice'), MONEY),
+    maxPrice: matching(params.get('maxPrice'), MONEY),
+    availability: oneOf(params.get('availability'), AVAILABILITIES),
+    sort: oneOf(params.get('sort'), SORTS),
+    page: Number.isInteger(page) && page >= 1 && page <= 10_000 ? page : undefined,
+  };
   // The API rejects relevance without a search term and an inverted price range.
   if (filters.sort === 'relevance' && !filters.search) filters.sort = undefined;
   if (filters.minPrice && filters.maxPrice && Number(filters.minPrice) > Number(filters.maxPrice)) {
     filters.maxPrice = undefined;
   }
-  return filters;
+  // Drop unset keys so filters compare (and serialize) cleanly.
+  return Object.fromEntries(
+    Object.entries(filters).filter(([, value]) => value !== undefined),
+  );
 }
 
 export function serializeFilters(filters: Partial<ProductFilters>): URLSearchParams {

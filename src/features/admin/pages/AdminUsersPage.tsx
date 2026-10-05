@@ -72,9 +72,18 @@ export function AdminUsersPage() {
               </Typography>
             )}
           </Typography>
-          <Typography variant="body2" color="textSecondary" sx={{ display: { md: 'none' } }}>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{ display: { md: 'none' }, overflowWrap: 'anywhere' }}
+          >
             {user.email}
           </Typography>
+          <Box sx={{ display: { sm: 'none' }, mt: 0.5 }}>
+            <StatusPill tone={user.isActive ? 'success' : 'neutral'}>
+              {user.isActive ? t('admin.active') : t('admin.inactive')}
+            </StatusPill>
+          </Box>
         </>
       ),
     },
@@ -88,6 +97,7 @@ export function AdminUsersPage() {
     {
       id: 'status',
       header: t('admin.users.status'),
+      hideBelow: 'sm',
       cell: (user) => (
         <StatusPill tone={user.isActive ? 'success' : 'neutral'}>
           {user.isActive ? t('admin.active') : t('admin.inactive')}

@@ -1,25 +1,39 @@
-import { z } from 'zod';
-
-const url = z.url({ protocol: /^https?$/ }).transform((value) => value.replace(/\/+$/, ''));
-
-export const envSchema = z.object({
+/**
+ * Environment validated once at startup. Hand-written (not a schema library) because this module
+ * is part of the initial bundle: two URL checks do not justify shipping a validator to every visitor.
+ */
+export interface Env {
   /** Base URL of the E-commerce API, e.g. https://api.shop.example */
-  VITE_API_URL: url,
+  VITE_API_URL: string;
   /** Public origin of this app, used for canonical URLs and Open Graph tags. */
-  VITE_SITE_URL: url,
-});
+  VITE_SITE_URL: string;
+}
 
-export type Env = z.infer<typeof envSchema>;
+const KEYS = ['VITE_API_URL', 'VITE_SITE_URL'] as const;
+
+function httpUrl(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+  } catch {
+    return null;
+  }
+  return value.replace(/\/+$/, '');
+}
 
 export function parseEnv(source: Record<string, unknown>): Env {
-  const result = envSchema.safeParse(source);
-  if (!result.success) {
-    const issues = result.error.issues
-      .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
-      .join('\n');
-    throw new Error(`Invalid environment configuration (see .env.example):\n${issues}`);
+  const env: Partial<Env> = {};
+  const issues: string[] = [];
+  for (const key of KEYS) {
+    const value = httpUrl(source[key]);
+    if (value === null) issues.push(`  - ${key}: expected an http(s) URL`);
+    else env[key] = value;
   }
-  return result.data;
+  if (issues.length > 0) {
+    throw new Error(`Invalid environment configuration (see .env.example):\n${issues.join('\n')}`);
+  }
+  return env as Env;
 }
 
 /** Validated once at startup; import this instead of touching import.meta.env directly. */

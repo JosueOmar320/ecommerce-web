@@ -33,10 +33,7 @@ describe('product filters in the URL', () => {
   it('drops combinations the API would reject', () => {
     expect(parse('sort=relevance').sort).toBeUndefined();
     expect(parse('sort=relevance&search=x').sort).toBe('relevance');
-    expect(parse('minPrice=500&maxPrice=100')).toMatchObject({
-      minPrice: '500',
-      maxPrice: undefined,
-    });
+    expect(parse('minPrice=500&maxPrice=100')).toEqual({ minPrice: '500' });
   });
 
   it('serializes without empty values or page 1', () => {

@@ -1,5 +1,4 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import { z } from 'zod';
 import { api, unwrap } from '@/api/client';
 import { ApiError } from '@/api/errors';
 import type { Order, OrderStatus, Payment } from '@/api/schema';
@@ -38,17 +37,12 @@ export const FULFILMENT_STEPS = [
 const PAID_STATUSES: readonly OrderStatus[] = ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
 export const isPaid = (status: OrderStatus) => PAID_STATUSES.includes(status);
 
-const listFiltersSchema = z.object({
-  page: z.coerce.number().int().min(1).catch(1),
-  status: z.enum(ORDER_STATUSES).optional().catch(undefined),
-});
-
 /** Order list state from the URL; malformed values fall back instead of failing. */
-export const parseOrderFilters = (params: URLSearchParams) =>
-  listFiltersSchema.parse({
-    page: params.get('page') ?? undefined,
-    status: params.get('status') ?? undefined,
-  });
+export function parseOrderFilters(params: URLSearchParams): { page: number; status?: OrderStatus } {
+  const page = Number(params.get('page'));
+  const status = ORDER_STATUSES.find((value) => value === params.get('status'));
+  return { page: Number.isInteger(page) && page >= 1 ? page : 1, ...(status && { status }) };
+}
 
 export function ordersQuery(filters: { page: number; status?: OrderStatus }) {
   return queryOptions({

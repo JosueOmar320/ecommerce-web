@@ -35,7 +35,7 @@ export function ProductMedia({ seed, brand, name, size = 'card' }: ProductMediaP
           fontWeight: 700,
           fontSize: '1.25rem',
           bgcolor: `hsl(${h} 18% 92%)`,
-          color: `hsl(${h} 22% 28%)`,
+          color: `hsl(${h} 25% 24%)`,
           ...theme.applyStyles('dark', {
             bgcolor: `hsl(${h} 12% 16%)`,
             color: `hsl(${h} 18% 78%)`,
@@ -57,7 +57,7 @@ export function ProductMedia({ seed, brand, name, size = 'card' }: ProductMediaP
         alignItems: 'flex-end',
         p: size === 'hero' ? { xs: 3, md: 5 } : 2,
         bgcolor: `hsl(${h} 18% 92%)`,
-        color: `hsl(${h} 22% 28%)`,
+        color: `hsl(${h} 25% 24%)`,
         ...theme.applyStyles('dark', { bgcolor: `hsl(${h} 12% 16%)`, color: `hsl(${h} 18% 78%)` }),
       })}
     >
@@ -70,7 +70,6 @@ export function ProductMedia({ seed, brand, name, size = 'card' }: ProductMediaP
           fontWeight: 650,
           letterSpacing: '0.14em',
           textTransform: 'uppercase',
-          opacity: 0.75,
         }}
       >
         {brand ?? ''}
@@ -81,7 +80,6 @@ export function ProductMedia({ seed, brand, name, size = 'card' }: ProductMediaP
           letterSpacing: '-0.04em',
           lineHeight: 0.95,
           fontSize: size === 'hero' ? 'clamp(2.5rem, 5vw, 4.5rem)' : 'clamp(1.4rem, 2.2vw, 1.9rem)',
-          opacity: 0.9,
           display: '-webkit-box',
           WebkitLineClamp: 3,
           WebkitBoxOrient: 'vertical',

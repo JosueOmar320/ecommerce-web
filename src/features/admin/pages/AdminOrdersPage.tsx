@@ -27,9 +27,15 @@ export function AdminOrdersPage() {
       id: 'number',
       header: t('admin.orders.number'),
       cell: (order) => (
-        <AppLink to={`/admin/orders/${order.id}`} sx={{ fontWeight: 650, whiteSpace: 'nowrap' }}>
-          {order.orderNumber}
-        </AppLink>
+        <>
+          <AppLink to={`/admin/orders/${order.id}`} sx={{ fontWeight: 650, whiteSpace: 'nowrap' }}>
+            {order.orderNumber}
+          </AppLink>
+          {/* Phones: the total column is hidden, so it is shown here. */}
+          <Typography variant="body2" color="textSecondary" sx={{ display: { sm: 'none' } }}>
+            {formatMoney(order.totalCents, order.currency, i18n.language)}
+          </Typography>
+        </>
       ),
     },
     {
@@ -63,6 +69,7 @@ export function AdminOrdersPage() {
       id: 'total',
       header: t('admin.orders.total'),
       align: 'right',
+      hideBelow: 'sm',
       cell: (order) => (
         <Typography variant="body2" sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
           {formatMoney(order.totalCents, order.currency, i18n.language)}

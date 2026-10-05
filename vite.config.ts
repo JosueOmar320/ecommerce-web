@@ -31,6 +31,8 @@ export default defineConfig(({ command, mode }) => {
       include: ['src/**/*.test.{ts,tsx}', 'test/**/*.test.{ts,tsx}'],
       css: false,
       restoreMocks: true,
+      // Whole user flows (checkout with payment polling, long admin forms) under a parallel run.
+      testTimeout: 20_000,
       coverage: {
         provider: 'v8',
         include: ['src/**/*.{ts,tsx}'],

@@ -9,6 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { useId } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { currencySymbol } from '@/lib/format';
@@ -29,6 +30,7 @@ export function VariantFields({ prefix = '', currency, isNew }: VariantFieldsPro
   const { t, i18n } = useTranslation();
   const { register, control, getFieldState, formState } = useFormContext();
   const attributes = useFieldArray({ control, name: `${prefix}attributes` });
+  const attributesId = useId();
   const error = (name: string) => getFieldState(`${prefix}${name}`, formState).error?.message;
   const money = {
     input: {
@@ -92,10 +94,15 @@ export function VariantFields({ prefix = '', currency, isNew }: VariantFieldsPro
       )}
 
       <Grid size={12}>
-        <Typography component="h4" variant="subtitle2" sx={{ mb: 1 }}>
+        {/* A label for the list, not a heading: its level would depend on where the fields sit. */}
+        <Typography id={attributesId} variant="subtitle2" sx={{ mb: 1 }}>
           {t('admin.products.attributes')}
         </Typography>
-        <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, display: 'grid', gap: 1.5 }}>
+        <Box
+          component="ul"
+          aria-labelledby={attributesId}
+          sx={{ listStyle: 'none', m: 0, p: 0, display: 'grid', gap: 1.5 }}
+        >
           {attributes.fields.map((field, index) => (
             <Box
               component="li"

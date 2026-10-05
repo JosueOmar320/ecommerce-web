@@ -70,16 +70,27 @@ export function ShippingStep({ selectedId, onContinue }: ShippingStepProps) {
                 value={address.id}
                 control={<Radio />}
                 sx={{ alignItems: 'flex-start', m: 0, width: '100%' }}
+                // Inside a <label>: phrasing content only, hence spans throughout.
                 label={
-                  <Box sx={{ pt: 0.75 }}>
-                    <Typography sx={{ fontWeight: 600 }}>
+                  <Box component="span" sx={{ display: 'block', pt: 0.75 }}>
+                    <Typography component="span" sx={{ display: 'block', fontWeight: 600 }}>
                       {address.recipientName}
                       {address.label && ` · ${address.label}`}
                       {address.isDefault && (
-                        <Chip size="small" label={t('checkout.default')} sx={{ ml: 1 }} />
+                        <Chip
+                          component="span"
+                          size="small"
+                          label={t('checkout.default')}
+                          sx={{ ml: 1 }}
+                        />
                       )}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ display: 'block' }}
+                    >
                       {formatAddress(address)}
                     </Typography>
                   </Box>

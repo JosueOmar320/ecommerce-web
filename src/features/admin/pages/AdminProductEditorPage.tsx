@@ -1,11 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import Add from '@mui/icons-material/AddOutlined';
+import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
+import EditOutlined from '@mui/icons-material/EditOutlined';
 import OpenInNew from '@mui/icons-material/OpenInNewOutlined';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
@@ -229,8 +233,11 @@ function ProductEditor({ product }: { product: ProductDetail }) {
     {
       id: 'sku',
       header: t('admin.products.sku'),
+      hideBelow: 'sm',
       cell: (variant) => (
-        <Typography sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{variant.sku}</Typography>
+        <Typography sx={{ fontFamily: 'monospace', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+          {variant.sku}
+        </Typography>
       ),
     },
     {
@@ -239,6 +246,13 @@ function ProductEditor({ product }: { product: ProductDetail }) {
       cell: (variant) => (
         <>
           {variant.name}
+          {/* On phones the SKU column is hidden; show it here instead. */}
+          <Typography
+            variant="body2"
+            sx={{ display: { sm: 'none' }, fontFamily: 'monospace', fontSize: '0.8rem' }}
+          >
+            {variant.sku}
+          </Typography>
           <Typography variant="body2" color="textSecondary">
             {Object.entries(variant.attributes)
               .map(([name, value]) => `${name}: ${value}`)
@@ -297,29 +311,34 @@ function ProductEditor({ product }: { product: ProductDetail }) {
       align: 'right',
       cell: (variant) =>
         canUpdate || canDelete ? (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+          // Icon buttons keep the table narrow enough for phones; names come from aria-label.
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.25 }}>
             {canUpdate && (
-              <Button
-                size="small"
-                aria-label={t('admin.products.editVariant', { sku: variant.sku })}
-                onClick={() => {
-                  setEditing(variant);
-                }}
-              >
-                {t('common.edit')}
-              </Button>
+              <Tooltip title={t('admin.products.editVariant', { sku: variant.sku })}>
+                <IconButton
+                  size="small"
+                  aria-label={t('admin.products.editVariant', { sku: variant.sku })}
+                  onClick={() => {
+                    setEditing(variant);
+                  }}
+                >
+                  <EditOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
             )}
             {canDelete && (
-              <Button
-                size="small"
-                color="error"
-                aria-label={t('admin.products.removeVariant', { sku: variant.sku })}
-                onClick={() => {
-                  setRemoving(variant);
-                }}
-              >
-                {t('common.delete')}
-              </Button>
+              <Tooltip title={t('admin.products.removeVariant', { sku: variant.sku })}>
+                <IconButton
+                  size="small"
+                  color="error"
+                  aria-label={t('admin.products.removeVariant', { sku: variant.sku })}
+                  onClick={() => {
+                    setRemoving(variant);
+                  }}
+                >
+                  <DeleteOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
             )}
           </Box>
         ) : null,

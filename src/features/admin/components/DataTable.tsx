@@ -74,8 +74,13 @@ export function DataTable<T>({
           sx={{
             opacity: isFetching && !isPending ? 0.6 : 1,
             transition: 'opacity 150ms',
-            '& th': { fontWeight: 650, color: 'text.secondary', whiteSpace: 'nowrap' },
-            '& td, & th': { px: 2, py: 1.25 },
+            '& th': {
+              fontWeight: 650,
+              color: 'text.secondary',
+              // Long headers (e.g. in Spanish) may wrap on phones instead of forcing a scroll.
+              whiteSpace: { xs: 'normal', sm: 'nowrap' },
+            },
+            '& td, & th': { px: { xs: 1.25, sm: 2 }, py: 1.25 },
           }}
         >
           <Box component="caption" sx={visuallyHidden}>

@@ -58,12 +58,14 @@ export function StockDrawer({ variantId, onClose }: { variantId: string; onClose
       id: 'reserved',
       header: t('admin.inventory.reservedChange'),
       align: 'right',
+      hideBelow: 'sm',
       cell: (m) => signed(m.reservedDelta),
     },
     {
       id: 'after',
       header: t('admin.inventory.after'),
       align: 'right',
+      hideBelow: 'sm',
       cell: (m) => `${m.onHandAfter} / ${m.reservedAfter}`,
     },
   ];
