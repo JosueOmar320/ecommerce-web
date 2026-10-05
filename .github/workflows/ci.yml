@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, types, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Generated API types match the committed OpenAPI contract
+        run: npm run api:check
+
+      - name: Unit and integration tests (with coverage)
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_URL: https://api.example.com
+          VITE_SITE_URL: https://shop.example.com
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+  e2e:
+    name: End-to-end (real API)
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      API_DIR: api
+      COMPOSE: docker compose -f api/docker-compose.yml -f e2e/compose.e2e.yml
+      E2E_API_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the API
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.API_REPOSITORY || 'JosueOmar320/ecommerce-api' }}
+          ref: ${{ vars.API_REF || 'main' }}
+          path: api
+
+      - name: The web app was built against the API's current contract
+        run: |
+          if ! cmp -s api/openapi.json openapi/openapi.json; then
+            echo "::error::openapi/openapi.json differs from the API. Run 'npm run api:sync && npm run api:generate'."
+            exit 1
+          fi
+
+      - name: Start the API stack (Postgres, Redis, migrations, API, worker)
+        run: |
+          $COMPOSE up -d --build api worker
+          for i in $(seq 1 60); do
+            curl -fsS "$E2E_API_URL/health/ready" && exit 0
+            sleep 2
+          done
+          $COMPOSE logs api
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the app against the local API
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:3000
+          VITE_SITE_URL: http://localhost:4173
+
+      - name: Install Playwright's Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright
+        run: npm run test:e2e
+        env:
+          # Seeds through the API image: wipes and reloads the deterministic dataset.
+          E2E_SEED_COMMAND: ${{ env.COMPOSE }} --profile seed run --rm seed
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      - name: API logs
+        if: failure()
+        run: $COMPOSE logs api worker --tail 200
+
+      - name: Stop the stack
+        if: always()
+        run: $COMPOSE down -v

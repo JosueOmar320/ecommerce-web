@@ -1,0 +1,12 @@
+# Overrides for the API's docker-compose.yml when it serves the end-to-end tests:
+#   docker compose -f <api>/docker-compose.yml -f e2e/compose.e2e.yml up -d --build
+# The suite logs in many times per minute and the app is served by `vite preview` on :4173.
+x-e2e-env: &e2e-env
+  RATE_LIMIT_ENABLED: 'false'
+  CORS_ORIGINS: http://localhost:4173,http://localhost:5173
+
+services:
+  api:
+    environment: *e2e-env
+  worker:
+    environment: *e2e-env

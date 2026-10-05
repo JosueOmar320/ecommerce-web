@@ -53,9 +53,7 @@ export function parseFilters(params: URLSearchParams): ProductFilters {
     filters.maxPrice = undefined;
   }
   // Drop unset keys so filters compare (and serialize) cleanly.
-  return Object.fromEntries(
-    Object.entries(filters).filter(([, value]) => value !== undefined),
-  );
+  return Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== undefined));
 }
 
 export function serializeFilters(filters: Partial<ProductFilters>): URLSearchParams {

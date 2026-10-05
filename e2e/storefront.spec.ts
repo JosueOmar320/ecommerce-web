@@ -49,7 +49,10 @@ test.describe('storefront', () => {
     await page.goto('/products');
     await page.getByRole('button', { name: 'Theme · Language' }).click();
     await page.getByRole('button', { name: 'Dark' }).click();
-    await page.getByRole('group', { name: 'Language' }).getByRole('button', { name: 'Español' }).click();
+    await page
+      .getByRole('group', { name: 'Language' })
+      .getByRole('button', { name: 'Español' })
+      .click();
     await page.keyboard.press('Escape');
 
     await expect(
