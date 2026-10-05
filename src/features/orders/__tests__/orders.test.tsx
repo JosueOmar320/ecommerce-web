@@ -86,7 +86,7 @@ describe('orders list', () => {
     const row = link.closest('li')!;
     expect(within(row).getByText('Awaiting payment')).toBeInTheDocument();
     expect(within(row).getByText('$1,725.84')).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent('2 orders');
+    expect(within(screen.getByRole('main')).getByRole('status')).toHaveTextContent('2 orders');
   });
 
   it('filters by status from the URL and offers a way back', async () => {

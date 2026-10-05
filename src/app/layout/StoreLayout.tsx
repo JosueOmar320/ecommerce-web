@@ -5,6 +5,7 @@ import { Footer } from './Footer';
 import { Header } from './Header';
 import { AppScrollRestoration } from './AppScrollRestoration';
 import { NavigationProgress } from './NavigationProgress';
+import { RouteFocus } from './RouteFocus';
 
 export function StoreLayout() {
   return (
@@ -22,6 +23,7 @@ export function StoreLayout() {
       </Box>
       <Footer />
       <AppScrollRestoration />
+      <RouteFocus />
     </Box>
   );
 }

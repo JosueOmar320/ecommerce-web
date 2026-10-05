@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { categoriesQuery } from '@/features/catalog/api';
 import { NavLink, useNavigate } from 'react-router';
 import { ADMIN_AREA_PERMISSIONS } from '@/features/auth/permissions';
+import { useNotify } from '@/components/Notifications';
 import { useSession } from '@/features/auth/session';
 import { Logo } from './Logo';
 import { PreferencesControls } from './PreferencesControls';
@@ -26,6 +27,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { status, user, hasPermission, logout } = useSession();
+  const notify = useNotify();
   const signedIn = status === 'authenticated';
   const categories = useQuery(categoriesQuery);
   const links: { to: string; label: string; end?: boolean }[] = [
@@ -93,7 +95,9 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
               <ListItemButton
                 onClick={async () => {
                   onClose();
-                  await logout();
+                  if (!(await logout())) {
+                    notify({ message: t('auth.signOutOffline'), severity: 'error' });
+                  }
                   void navigate('/');
                 }}
                 sx={{ py: 1.25 }}

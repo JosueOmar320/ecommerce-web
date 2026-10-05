@@ -47,7 +47,14 @@ export function MoveToCartDialog({ product, onClose, onMoved }: MoveToCartDialog
     (axes.length === 0 ? defaultVariant(variants) : undefined);
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="sm" aria-labelledby="move-to-cart-title">
+    <Dialog
+      open
+      // Stay open while adding: closing would skip removing the item from the wishlist.
+      onClose={addToCart.isPending ? undefined : onClose}
+      fullWidth
+      maxWidth="sm"
+      aria-labelledby="move-to-cart-title"
+    >
       <DialogTitle id="move-to-cart-title">
         {t('wishlist.chooseOptionsFor', { name: product.name })}
       </DialogTitle>
@@ -83,7 +90,9 @@ export function MoveToCartDialog({ product, onClose, onMoved }: MoveToCartDialog
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5 }}>
-        <Button onClick={onClose}>{t('common.cancel')}</Button>
+        <Button onClick={onClose} disabled={addToCart.isPending}>
+          {t('common.cancel')}
+        </Button>
         <Button
           variant="contained"
           disabled={!variant?.inStock || addToCart.isPending}

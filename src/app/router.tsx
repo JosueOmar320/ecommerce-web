@@ -1,6 +1,7 @@
-import type { ComponentType } from 'react';
+import { lazy, Suspense, type ComponentType } from 'react';
 import { createBrowserRouter, Outlet, type RouteObject } from 'react-router';
 import { NotificationsProvider } from '@/components/Notifications';
+import { PageLoader } from '@/components/PageLoader';
 import { RequireAnyPermission, RequireAuth } from '@/features/auth/guards';
 import { ADMIN_AREA_PERMISSIONS } from '@/features/auth/permissions';
 import { StoreLayout } from './layout/StoreLayout';
@@ -16,6 +17,25 @@ function page<M extends Record<K, ComponentType>, K extends string>(
   name: K,
 ) {
   return async () => ({ Component: (await load())[name] });
+}
+
+/**
+ * Lazy element for routes behind a guard. Route `lazy()` is resolved for every matched route
+ * before anything renders (guards included), so it would download code the visitor may not be
+ * allowed to see; a React.lazy element only loads once the guard actually renders it.
+ */
+function guardedPage<M extends Record<K, ComponentType>, K extends string>(
+  load: () => Promise<M>,
+  name: K,
+) {
+  const Page = lazy(async (): Promise<{ default: ComponentType }> => ({
+    default: (await load())[name],
+  }));
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Page />
+    </Suspense>
+  );
 }
 
 /** Root of every route: providers that need the router (links inside notifications). */
@@ -110,15 +130,15 @@ export const routes: RouteObject[] = [
         errorElement: <RouteErrorBoundary />,
         children: [
           {
-            // The back office is only downloaded by people allowed to open it.
-            lazy: page(() => import('./layout/AdminLayout'), 'AdminLayout'),
+            // The back office is only downloaded by people allowed to open it (see guardedPage).
+            element: guardedPage(() => import('./layout/AdminLayout'), 'AdminLayout'),
             children: [
               {
                 errorElement: <RouteErrorBoundary />,
                 children: [
                   {
                     index: true,
-                    lazy: page(
+                    element: guardedPage(
                       () => import('@/features/admin/pages/AdminDashboardPage'),
                       'AdminDashboardPage',
                     ),
@@ -128,14 +148,14 @@ export const routes: RouteObject[] = [
                     children: [
                       {
                         path: 'products',
-                        lazy: page(
+                        element: guardedPage(
                           () => import('@/features/admin/pages/AdminProductsPage'),
                           'AdminProductsPage',
                         ),
                       },
                       {
                         path: 'products/:productId',
-                        lazy: page(
+                        element: guardedPage(
                           () => import('@/features/admin/pages/AdminProductEditorPage'),
                           'AdminProductEditorPage',
                         ),
@@ -148,7 +168,7 @@ export const routes: RouteObject[] = [
                     children: [
                       {
                         index: true,
-                        lazy: page(
+                        element: guardedPage(
                           () => import('@/features/admin/pages/AdminCategoriesPage'),
                           'AdminCategoriesPage',
                         ),
@@ -161,7 +181,7 @@ export const routes: RouteObject[] = [
                     children: [
                       {
                         index: true,
-                        lazy: page(
+                        element: guardedPage(
                           () => import('@/features/admin/pages/AdminInventoryPage'),
                           'AdminInventoryPage',
                         ),
@@ -174,14 +194,14 @@ export const routes: RouteObject[] = [
                     children: [
                       {
                         index: true,
-                        lazy: page(
+                        element: guardedPage(
                           () => import('@/features/admin/pages/AdminOrdersPage'),
                           'AdminOrdersPage',
                         ),
                       },
                       {
                         path: ':orderId',
-                        lazy: page(
+                        element: guardedPage(
                           () => import('@/features/admin/pages/AdminOrderDetailPage'),
                           'AdminOrderDetailPage',
                         ),
@@ -194,7 +214,7 @@ export const routes: RouteObject[] = [
                     children: [
                       {
                         index: true,
-                        lazy: page(
+                        element: guardedPage(
                           () => import('@/features/admin/pages/AdminUsersPage'),
                           'AdminUsersPage',
                         ),

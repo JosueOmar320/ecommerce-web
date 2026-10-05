@@ -2,6 +2,7 @@ import { queryOptions, type QueryClient } from '@tanstack/react-query';
 import { api, unwrap } from '@/api/client';
 import type { CurrentUser, LoginRequest, RegisterRequest } from '@/api/schema';
 import { tokenStore } from '@/api/session';
+import { removeStorage } from '@/lib/storage';
 
 export const authKeys = {
   me: ['session', 'me'] as const,
@@ -20,8 +21,14 @@ export const USER_SCOPED_ROOTS = [
   'admin',
 ] as const;
 
+/** Browser-stored traces of what the previous person looked at or added. */
+const USER_SCOPED_STORAGE = ['kestrel.recently-viewed', 'kestrel.cart-prices'];
+
 export function clearUserData(queryClient: QueryClient) {
   for (const root of USER_SCOPED_ROOTS) queryClient.removeQueries({ queryKey: [root] });
+  // Product details can include drafts when fetched by staff (`products:read`).
+  queryClient.removeQueries({ queryKey: ['catalog', 'products', 'detail'] });
+  for (const key of USER_SCOPED_STORAGE) removeStorage(key);
 }
 
 export const meQuery = queryOptions({

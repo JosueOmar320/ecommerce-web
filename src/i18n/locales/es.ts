@@ -300,6 +300,9 @@ export const es: Translations = {
     payBefore:
       'Completa el pago antes de las {{time}} o el pedido se cancelará y se liberarán los artículos.',
     orderExpired: 'Este pedido ya no está pendiente de pago.',
+    paymentSlow:
+      'El proveedor de pagos aún no responde. El pago todavía puede completarse: vuelve a comprobarlo en un momento o revisa el pedido más tarde.',
+    checkAgain: 'Comprobar de nuevo',
     confirmationTitle: '¡Gracias! Tu pedido está confirmado.',
     confirmationBody: 'El pedido {{number}} está pagado. Te enviamos un correo de confirmación.',
     viewOrder: 'Ver detalles del pedido',
@@ -363,6 +366,8 @@ export const es: Translations = {
     signInRequired: 'Inicia sesión para continuar.',
     passwordChanged: 'Tu contraseña se cambió. Inicia sesión con la nueva contraseña.',
     signedOut: 'Cerraste sesión.',
+    signOutOffline:
+      'Cerraste sesión en este dispositivo, pero no se pudo contactar a la tienda para terminar la sesión. Vuelve a cerrar sesión cuando tengas conexión.',
     devCredentials:
       'Cuentas de demostración (datos de desarrollo): customer@example.com o admin@example.com, contraseña Password123!',
     validation: {

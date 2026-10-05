@@ -121,8 +121,8 @@ export function CartPage() {
                 item={item}
                 currency={data.currency}
                 busy={remove.isPending}
-                onQuantity={(quantity) => {
-                  update.mutate({ itemId: item.id, quantity });
+                onQuantity={(quantity, revert) => {
+                  update.mutate({ itemId: item.id, quantity }, { onError: revert });
                 }}
                 onRemove={() => {
                   remove.mutate(item.id, {

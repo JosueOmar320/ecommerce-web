@@ -12,21 +12,35 @@ export const cartQuery = queryOptions({
   staleTime: 0,
 });
 
+interface CartMutationOptions {
+  /**
+   * Runs even if the calling component unmounts first (unlike callbacks passed to `mutate`),
+   * e.g. when the product page swaps its purchase panel for another variant.
+   */
+  onSuccess?: (cart: Cart) => void;
+}
+
 /** Every cart mutation returns the full, server-priced cart: write it to the cache as-is. */
-function useCartMutation<TVariables>(mutationFn: (variables: TVariables) => Promise<Cart>) {
+function useCartMutation<TVariables>(
+  mutationFn: (variables: TVariables) => Promise<Cart>,
+  options: CartMutationOptions = {},
+) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
     // Cart mutations run one at a time: each response is the full cart, so an older response
     // arriving after a newer one would otherwise overwrite fresher data.
     scope: { id: 'cart' },
+    // Same for reads: a GET started before the mutation must not land after its result.
+    onMutate: () => queryClient.cancelQueries({ queryKey: cartKeys.all }),
     onSuccess: (cart) => {
       queryClient.setQueryData(cartKeys.all, cart);
+      options.onSuccess?.(cart);
     },
   });
 }
 
-export function useAddToCart() {
+export function useAddToCart(options?: CartMutationOptions) {
   return useCartMutation(
     async ({ variantId, quantity }: { variantId: string; quantity: number }) => {
       const cart = (await unwrap(api.POST('/api/v1/cart/items', { body: { variantId, quantity } })))
@@ -35,6 +49,7 @@ export function useAddToCart() {
       if (line) rememberPrice(variantId, line.unitPriceCents);
       return cart;
     },
+    options,
   );
 }
 

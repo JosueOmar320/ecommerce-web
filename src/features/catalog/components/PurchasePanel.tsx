@@ -30,7 +30,16 @@ export function PurchasePanel({ product, variant }: PurchasePanelProps) {
   const location = useLocation();
   const notify = useNotify();
   const { status } = useSession();
-  const addToCart = useAddToCart();
+  // Toast from the hook, not from `mutate`: it still shows if this panel is swapped for another
+  // variant's while the request is in flight.
+  const addToCart = useAddToCart({
+    onSuccess: () => {
+      notify({
+        message: t('product.addedToCart'),
+        action: { label: t('product.viewCart'), to: '/cart' },
+      });
+    },
+  });
   const [quantity, setQuantity] = useState(1);
 
   const max = variant ? Math.min(variant.availableQuantity, MAX_PER_LINE) : 1;
@@ -106,17 +115,7 @@ export function PurchasePanel({ product, variant }: PurchasePanelProps) {
             disabled={!canBuy || addToCart.isPending}
             onClick={() => {
               if (!variant) return;
-              addToCart.mutate(
-                { variantId: variant.id, quantity: qty },
-                {
-                  onSuccess: () => {
-                    notify({
-                      message: t('product.addedToCart'),
-                      action: { label: t('product.viewCart'), to: '/cart' },
-                    });
-                  },
-                },
-              );
+              addToCart.mutate({ variantId: variant.id, quantity: qty });
             }}
           >
             {!canBuy

@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { Order, Payment } from '@/api/schema';
-import { http, HttpResponse, url } from '../../../../test/msw/http';
+import { apiError, http, HttpResponse, url } from '../../../../test/msw/http';
 import { server } from '../../../../test/msw/server';
 import { signedInAs } from '../../../../test/msw/session';
 import { cartItem, cartWith, homeAddress, orderFrom, payment } from '../../../../test/msw/shop';
@@ -149,6 +149,61 @@ describe('checkout', () => {
       await screen.findByText('Thank you! Your order is confirmed.', {}, { timeout: 5_000 }),
     ).toBeInTheDocument();
     expect(state.paymentKeys[0]).not.toBe(state.paymentKeys[1]);
+  });
+
+  it('uses a new idempotency key after a definitive failure, once the cart is fixed', async () => {
+    const state = checkoutBackend();
+    let rejectNext = true;
+    server.use(
+      http.post(url('/api/v1/orders'), ({ request }) => {
+        state.orderKeys.push(request.headers.get('idempotency-key') ?? '');
+        if (rejectNext) {
+          rejectNext = false;
+          return apiError(422, 'CART_HAS_UNAVAILABLE_ITEMS', 'Unavailable items');
+        }
+        state.order = orderFrom(state.cart);
+        return HttpResponse.json({ data: state.order }, { status: 201 });
+      }),
+    );
+    const { user } = renderApp({ route: `/checkout?step=review&address=${homeAddress.id}` });
+
+    await user.click(await screen.findByRole('button', { name: /Place order/ }));
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Place order/ }));
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Payment' })).toBeInTheDocument();
+    // The API stored the 422 under the first key: reusing it would replay the failure.
+    expect(state.orderKeys).toHaveLength(2);
+    expect(state.orderKeys[0]).not.toBe(state.orderKeys[1]);
+  });
+
+  it('never shows a cancelled order as confirmed, even if a payment completed', async () => {
+    const state = checkoutBackend();
+    state.order = orderFrom(state.cart, {
+      status: 'CANCELLED',
+      allowedTransitions: [],
+      expiresAt: null,
+    });
+    state.payments = [payment(state.order, { status: 'COMPLETED' })];
+    renderApp({ route: `/checkout?step=payment&order=${state.order.id}` });
+
+    expect(
+      await screen.findByText('This order is no longer awaiting payment.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'View order details' })).toHaveAttribute(
+      'href',
+      `/orders/${state.order.id}`,
+    );
+    expect(screen.queryByText('Thank you! Your order is confirmed.')).not.toBeInTheDocument();
+  });
+
+  it('does not show the confirmation for an unpaid order opened by URL', async () => {
+    const state = checkoutBackend();
+    state.order = orderFrom(state.cart);
+    const { router } = renderApp({ route: `/checkout?step=confirmation&order=${state.order.id}` });
+    expect(await screen.findByRole('heading', { level: 2, name: 'Payment' })).toBeInTheDocument();
+    expect(router.state.location.search).toContain('step=payment');
+    expect(screen.queryByText('Thank you! Your order is confirmed.')).not.toBeInTheDocument();
   });
 
   it('falls back to shipping when a step is opened without its prerequisites', async () => {

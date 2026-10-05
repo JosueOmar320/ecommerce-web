@@ -304,6 +304,9 @@ export const en = {
     payBefore:
       'Complete payment before {{time}} or the order will be cancelled and the items released.',
     orderExpired: 'This order is no longer awaiting payment.',
+    paymentSlow:
+      'The payment provider has not answered yet. The payment may still go through: check again in a moment, or see the order later.',
+    checkAgain: 'Check again',
     confirmationTitle: 'Thank you! Your order is confirmed.',
     confirmationBody: 'Order {{number}} has been paid. We have sent a confirmation email.',
     viewOrder: 'View order details',
@@ -367,6 +370,8 @@ export const en = {
     signInRequired: 'Sign in to continue.',
     passwordChanged: 'Your password was changed. Sign in with your new password.',
     signedOut: 'You have signed out.',
+    signOutOffline:
+      'You are signed out on this device, but the store could not be reached to end the session. Sign out again when you are online.',
     devCredentials:
       'Demo accounts (development data): customer@example.com or admin@example.com, password Password123!',
     validation: {

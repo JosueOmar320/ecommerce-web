@@ -8,6 +8,7 @@ import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink, useNavigate } from 'react-router';
 import { ADMIN_AREA_PERMISSIONS } from '@/features/auth/permissions';
+import { useNotify } from '@/components/Notifications';
 import { useSession } from '@/features/auth/session';
 
 /** Sign-in link for visitors; an accessible account menu (MUI Menu: arrow keys, Esc) for customers. */
@@ -15,6 +16,7 @@ export function AccountMenu() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { status, user, hasPermission, logout } = useSession();
+  const notify = useNotify();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const menuId = useId();
 
@@ -83,7 +85,9 @@ export function AccountMenu() {
         <MenuItem
           onClick={async () => {
             close();
-            await logout();
+            if (!(await logout())) {
+              notify({ message: t('auth.signOutOffline'), severity: 'error' });
+            }
             void navigate('/');
           }}
         >

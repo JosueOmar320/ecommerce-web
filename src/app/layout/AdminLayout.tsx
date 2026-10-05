@@ -26,6 +26,7 @@ import { AccountMenu } from './AccountMenu';
 import { AppScrollRestoration } from './AppScrollRestoration';
 import { NavigationProgress } from './NavigationProgress';
 import { PreferencesMenu } from './PreferencesMenu';
+import { RouteFocus } from './RouteFocus';
 
 const SIDEBAR_WIDTH = 248;
 
@@ -193,6 +194,7 @@ export function AdminLayout() {
         </Box>
       </Box>
       <AppScrollRestoration />
+      <RouteFocus />
     </Box>
   );
 }

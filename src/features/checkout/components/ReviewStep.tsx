@@ -7,7 +7,8 @@ import Typography from '@mui/material/Typography';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router';
-import type { Order } from '@/api/schema';
+import { isApiError } from '@/api/errors';
+import type { Order, Cart } from '@/api/schema';
 import { ErrorState } from '@/components/ErrorState';
 import { useNotify } from '@/components/Notifications';
 import { OrderTotals } from '@/components/OrderTotals';
@@ -21,7 +22,20 @@ import { clearIdempotencyKey, getIdempotencyKey } from '@/lib/idempotency';
 import { formatAddress } from '@/features/account/formatAddress';
 import { StepHeading } from './StepHeading';
 
-const ORDER_KEY_SCOPE = 'checkout-order';
+/**
+ * One key per (address, cart contents): a retry of the same checkout reuses it, so a lost
+ * response can never create a second order, while a different cart gets a fresh key instead of
+ * the API replaying the previous order.
+ */
+const orderKeyScope = (addressId: string, cart: Cart | undefined) =>
+  `checkout-order:${addressId}:${(cart?.items ?? [])
+    .map((item) => `${item.variantId}x${item.quantity}`)
+    .sort()
+    .join(',')}`;
+
+/** Only these outcomes may succeed on a retry with the same key; the API stores all others. */
+const isRetryableWithSameKey = (error: unknown) =>
+  isApiError(error) && (error.isNetworkError || error.status === 409 || error.status === 502);
 
 interface ReviewStepProps {
   addressId: string;
@@ -36,9 +50,10 @@ export function ReviewStep({ addressId, onChangeAddress, onPlaced }: ReviewStepP
   const cart = useQuery(cartQuery);
   const addresses = useQuery(addressesQuery);
   const place = useMutation({
-    mutationFn: () => createOrder(addressId, getIdempotencyKey(ORDER_KEY_SCOPE)),
-    onSuccess: (order) => {
-      clearIdempotencyKey(ORDER_KEY_SCOPE);
+    // The scope travels with the request, so the handlers clear exactly the key that was sent.
+    mutationFn: (keyScope: string) => createOrder(addressId, getIdempotencyKey(keyScope)),
+    onSuccess: (order, keyScope) => {
+      clearIdempotencyKey(keyScope);
       forgetPrices([]);
       queryClient.setQueryData(orderKeys.detail(order.id), order);
       // Move on first: emptying the cached cart below must not trigger the "empty cart" guard.
@@ -52,7 +67,10 @@ export function ReviewStep({ addressId, onChangeAddress, onPlaced }: ReviewStepP
       );
       void queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
     },
-    onError: () => {
+    onError: (error, keyScope) => {
+      // A definitive answer (e.g. 422 unavailable items) is stored by the API under this key:
+      // the next attempt, after fixing the cart, must use a new one.
+      if (!isRetryableWithSameKey(error)) clearIdempotencyKey(keyScope);
       // Stock or price changed: show the fresh cart before the customer tries again.
       void queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
@@ -146,7 +164,7 @@ export function ReviewStep({ addressId, onChangeAddress, onPlaced }: ReviewStepP
         sx={{ mt: 3 }}
         disabled={place.isPending || !cart.data.isCheckoutReady || !address}
         onClick={() => {
-          place.mutate();
+          place.mutate(orderKeyScope(addressId, cart.data));
         }}
       >
         {place.isPending

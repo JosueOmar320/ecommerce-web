@@ -35,6 +35,16 @@ test.describe('authentication', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
+  test('anonymous visitors to /admin download none of the back-office code', async ({ page }) => {
+    const scripts: string[] = [];
+    page.on('request', (request) => {
+      if (request.resourceType() === 'script') scripts.push(request.url());
+    });
+    await page.goto('/admin');
+    await expect(page).toHaveURL(/\/login\?redirect=%2Fadmin/);
+    expect(scripts.filter((src) => /\/assets\/Admin/.test(src))).toEqual([]);
+  });
+
   test('customers cannot open the back office', async ({ page, loginAs }) => {
     await loginAs('customer');
     await page.goto('/admin');

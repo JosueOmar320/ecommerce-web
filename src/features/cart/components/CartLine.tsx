@@ -18,7 +18,8 @@ interface CartLineProps {
   item: CartItem;
   currency: string;
   busy: boolean;
-  onQuantity: (quantity: number) => void;
+  /** `revert` restores the server's quantity when the update is rejected. */
+  onQuantity: (quantity: number, revert: () => void) => void;
   onRemove: () => void;
 }
 
@@ -29,13 +30,18 @@ export function CartLine({ item, currency, busy, onQuantity, onRemove }: CartLin
   // Local draft so rapid +/− clicks become one request after a short pause.
   const [draft, setDraft] = useState(item.quantity);
   const [synced, setSynced] = useState(item.quantity);
+  const debounced = useDebouncedValue(draft, 400);
   if (synced !== item.quantity) {
     setSynced(item.quantity);
-    setDraft(item.quantity);
+    // Adopt the server's value unless the customer is still changing it (a newer request follows).
+    if (draft === debounced) setDraft(item.quantity);
   }
-  const debounced = useDebouncedValue(draft, 400);
   useEffect(() => {
-    if (debounced !== item.quantity) onQuantity(debounced);
+    if (debounced !== item.quantity) {
+      onQuantity(debounced, () => {
+        setDraft(item.quantity);
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- react to the user's input only
   }, [debounced]);
 

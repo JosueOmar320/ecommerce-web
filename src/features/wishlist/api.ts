@@ -33,6 +33,8 @@ export function useToggleWishlist() {
   return useMutation({
     mutationFn: (variables: ToggleVariables) =>
       variables.saved ? removeItem(variables.productId) : addItem(variables.productId),
+    // One toggle at a time, so responses (and rollbacks) cannot apply out of order.
+    scope: { id: 'wishlist' },
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: wishlistKeys.all });
       const previous = queryClient.getQueryData<WishlistItem[]>(wishlistKeys.all);
@@ -52,6 +54,8 @@ export function useToggleWishlist() {
     },
     onError: (_error, _variables, context) => {
       queryClient.setQueryData(wishlistKeys.all, context?.previous);
+      // The snapshot may predate other saved items: resync with the server.
+      void queryClient.invalidateQueries({ queryKey: wishlistKeys.all });
     },
     onSuccess: (items) => {
       queryClient.setQueryData(wishlistKeys.all, items);

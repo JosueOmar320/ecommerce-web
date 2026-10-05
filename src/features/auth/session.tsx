@@ -32,7 +32,11 @@ interface SessionContextValue {
   hasPermission: (...permissions: Permission[]) => boolean;
   login: (body: LoginRequest) => Promise<CurrentUser>;
   register: (body: RegisterRequest) => Promise<CurrentUser>;
-  logout: (reason?: SessionEndReason) => Promise<void>;
+  /**
+   * Ends the session in this browser in any case. Resolves to false when the API could not be
+   * reached to revoke the refresh cookie (offline), so callers can tell the user.
+   */
+  logout: (reason?: SessionEndReason) => Promise<boolean>;
 }
 
 /** `expired`: the refresh token is no longer valid. `passwordChanged`: the API revoked every session. */
@@ -80,6 +84,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         tokenStore.set(null);
         clearUserData(queryClient);
       } else {
+        // Another tab signed in, possibly as someone else: never keep the previous account's data.
+        clearUserData(queryClient);
         void refreshAccessToken();
       }
     };
@@ -123,6 +129,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       logout: async (reason) => {
         try {
           await logoutRequest();
+          return true;
+        } catch {
+          return false;
         } finally {
           clearUserData(queryClient);
           setEndReason(reason ?? null);

@@ -13,12 +13,14 @@ import Typography from '@mui/material/Typography';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link as RouterLink } from 'react-router';
 import { isApiError } from '@/api/errors';
 import type { Order } from '@/api/schema';
 import { ErrorState } from '@/components/ErrorState';
 import { OrderTotals } from '@/components/OrderTotals';
 import {
   createPayment,
+  isPaid,
   latestPayment,
   orderKeys,
   orderPaymentsQuery,
@@ -37,6 +39,8 @@ const METHODS = [
 ] as const;
 type Method = (typeof METHODS)[number];
 const POLL_MS = 1_500;
+/** After this long without an answer, stop polling and let the customer check again. */
+const MAX_WAIT_MS = 60_000;
 
 interface PaymentStepProps {
   orderId: string;
@@ -49,14 +53,31 @@ export function PaymentStep({ orderId, onConfirmed }: PaymentStepProps) {
   const [method, setMethod] = useState<Method>('mock_card_success');
   const keyScope = `payment-${orderId}`;
 
-  const payments = useQuery({
-    ...orderPaymentsQuery(orderId),
-    // Poll while the provider has not answered yet (its webhook arrives asynchronously).
-    refetchInterval: (query) =>
-      latestPayment(query.state.data)?.status === 'PENDING' ? POLL_MS : false,
-  });
+  // Each "check again" starts a new waiting round with its own time limit.
+  const [round, setRound] = useState(0);
+  const [timedOutRound, setTimedOutRound] = useState<number | null>(null);
+  const [polling, setPolling] = useState(true);
+
+  // Poll while the provider has not answered yet (its webhook arrives asynchronously), but only
+  // while the order can still be paid and for a limited time: a lost webhook or an order expired
+  // by the API would otherwise keep two requests every 1.5 s going forever.
+  const interval = polling ? POLL_MS : false;
+  const payments = useQuery({ ...orderPaymentsQuery(orderId), refetchInterval: interval });
+  const order = useQuery({ ...orderQuery(orderId), refetchInterval: interval });
   const waiting = latestPayment(payments.data)?.status === 'PENDING';
-  const order = useQuery({ ...orderQuery(orderId), refetchInterval: waiting ? POLL_MS : false });
+  const timedOut = timedOutRound === round;
+  const shouldPoll = waiting && !timedOut && order.data?.status === 'PENDING';
+  if (polling !== shouldPoll) setPolling(shouldPoll);
+
+  useEffect(() => {
+    if (!waiting) return;
+    const timer = setTimeout(() => {
+      setTimedOutRound(round);
+    }, MAX_WAIT_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [waiting, round]);
 
   const pay = useMutation({
     mutationFn: () => createPayment(orderId, method, getIdempotencyKey(keyScope)),
@@ -73,10 +94,12 @@ export function PaymentStep({ orderId, onConfirmed }: PaymentStepProps) {
   }, [latest?.status, keyScope]);
 
   useEffect(() => {
-    if (order.data?.status === 'CONFIRMED' || latest?.status === 'COMPLETED') {
+    if ((order.data && isPaid(order.data.status)) || latest?.status === 'COMPLETED') {
       clearIdempotencyKey(keyScope);
       void order.refetch().then((r) => {
-        if (r.data && r.data.status !== 'PENDING') onConfirmed(r.data);
+        // Only a paid order is confirmed: a payment that lands after the order expired leaves
+        // it CANCELLED (and refunded), which must not look like a success.
+        if (r.data && isPaid(r.data.status)) onConfirmed(r.data);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- react to status changes only
@@ -95,9 +118,26 @@ export function PaymentStep({ orderId, onConfirmed }: PaymentStepProps) {
   const data = order.data;
   const money = (cents: number) => formatMoney(cents, data.currency, i18n.language);
 
+  if (isPaid(data.status)) {
+    // Paid: the confirmation step is about to open.
+    return (
+      <Box role="status" sx={{ py: 3 }}>
+        <Typography sx={{ mb: 1.5 }}>{t('checkout.confirming')}</Typography>
+        <LinearProgress />
+      </Box>
+    );
+  }
   if (data.status !== 'PENDING') {
     return (
-      <Alert severity="info" variant="outlined">
+      <Alert
+        severity="info"
+        variant="outlined"
+        action={
+          <Button component={RouterLink} to={`/orders/${orderId}`} color="inherit" size="small">
+            {t('checkout.viewOrder')}
+          </Button>
+        }
+      >
         {t('checkout.orderExpired')}
       </Alert>
     );
@@ -139,7 +179,27 @@ export function PaymentStep({ orderId, onConfirmed }: PaymentStepProps) {
         </Alert>
       )}
 
-      {waiting ? (
+      {waiting && timedOut ? (
+        <Alert
+          severity="warning"
+          variant="outlined"
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setRound((value) => value + 1);
+                void payments.refetch();
+                void order.refetch();
+              }}
+            >
+              {t('checkout.checkAgain')}
+            </Button>
+          }
+        >
+          {t('checkout.paymentSlow')}
+        </Alert>
+      ) : waiting ? (
         <Box role="status" sx={{ py: 3 }}>
           <Typography sx={{ mb: 1.5 }}>{t('checkout.confirming')}</Typography>
           <LinearProgress />

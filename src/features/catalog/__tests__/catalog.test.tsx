@@ -21,7 +21,7 @@ describe('products page', () => {
   it('applies filters from a shared URL (deep link)', async () => {
     renderApp({ route: '/products?category=audio&availability=in_stock' });
     await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent('1 product');
+      expect(within(screen.getByRole('main')).getByRole('status')).toHaveTextContent('1 product');
     });
     expect(productNames()).toEqual(['Echo Studio Wireless Headphones']);
     expect(screen.getByRole('button', { name: 'Remove filter: Audio' })).toBeInTheDocument();
@@ -47,12 +47,12 @@ describe('products page', () => {
     const { user, router } = renderApp({ route: '/products?category=audio' });
     await user.click(await screen.findByRole('button', { name: 'Remove filter: Audio' }));
     await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent('4 products');
+      expect(within(screen.getByRole('main')).getByRole('status')).toHaveTextContent('4 products');
     });
 
     await router.navigate(-1);
     await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent('2 products');
+      expect(within(screen.getByRole('main')).getByRole('status')).toHaveTextContent('2 products');
     });
   });
 

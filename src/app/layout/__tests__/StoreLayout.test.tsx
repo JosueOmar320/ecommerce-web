@@ -11,6 +11,24 @@ describe('store layout', () => {
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
   });
 
+  it('moves focus to the new page and announces it after navigating', async () => {
+    const { user } = renderApp();
+    await screen.findByRole('heading', { level: 1 });
+    const nav = screen.getByRole('navigation', { name: 'Main navigation' });
+    await user.click(within(nav).getByRole('link', { name: 'Shop' }));
+
+    await screen.findByRole('heading', { level: 1, name: 'All products' });
+    await waitFor(() => {
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+    // Announced through a live region outside the page content.
+    await waitFor(() => {
+      expect(
+        screen.getAllByRole('status').some((region) => region.textContent.includes('All products')),
+      ).toBe(true);
+    });
+  });
+
   it('submits a search to the products page as URL state', async () => {
     const { user, router } = renderApp();
     const search = await screen.findByRole('searchbox', { name: 'Search products' });

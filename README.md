@@ -194,6 +194,9 @@ Target: **WCAG 2.2 AA**.
   runs axe on key screens too (contrast excluded there, since jsdom cannot compute it).
 - **Structure:** one `<h1>` per page, a correct heading order, landmarks, a skip link, and real
   `<table>`s with captions for data. Nested lists represent the category tree.
+- **Navigation:** on every client-side page change, focus moves to the main content and the new page
+  title is announced (unless the page placed focus itself, as checkout steps do). Toasts are added
+  to a live region that stays mounted, so screen readers reliably read them.
 - **Keyboard and focus:** visible focus everywhere. Focus moves to step headings in checkout and to
   the page heading when an action removes its trigger (cancelling an order). Dialogs trap and
   restore focus, and a sticky header never hides the focused element (2.4.11).
@@ -215,7 +218,7 @@ statically, i.e. what the browser needs before the first render:
 
 |                                          | Size (gzip)              |
 | ---------------------------------------- | ------------------------ |
-| Initial JavaScript (storefront, English) | **253 KB**               |
+| Initial JavaScript (storefront, English) | **252 KB**               |
 | Spanish copy (only for Spanish visitors) | 9.2 KB                   |
 | Home / Catalog / Product page chunks     | 2.9 KB / 0.5 KB / 3.3 KB |
 | Checkout chunk                           | 7.6 KB                   |
@@ -224,9 +227,9 @@ statically, i.e. what the browser needs before the first render:
 
 What got it there:
 
-- **Route-level splitting:** 99 chunks; every page and the whole back office load on demand.
+- **Route-level splitting:** 97 chunks; every page and the whole back office load on demand.
 - **No schema library on the first load:** env and URL parsing are small hand-written parsers, so
-  Zod only loads on routes with forms. That took the initial JS from 276 to 253 KB gzip.
+  Zod only loads on routes with forms. That took the initial JS from 276 to about 252 KB gzip.
 - **Language on demand:** non-default languages are fetched when needed and awaited before the
   first render, so there is no flash of English.
 - **Data:** product queries prefetch on hover/focus, lists keep previous data while the next page
@@ -236,14 +239,14 @@ What got it there:
 
 ## Testing
 
-| Suite              | Tool                         | What it covers                                                                                                                                                                                                                                 |
-| ------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit + integration | Vitest, Testing Library, MSW | **122 tests**: the real routes and providers rendered against MSW handlers typed with the API's schemas (unhandled requests fail), plus pure logic (filters, variants, formatting, the auth client)                                            |
-| End-to-end         | Playwright                   | **19 tests** on the production build against a real, freshly seeded API: catalog, auth, full checkout paid through the real webhook, invoice, wishlist, cancellation, admin product creation, stock movements, order transitions, phone layout |
-| Accessibility      | axe-core                     | In unit tests and, with colour contrast, in Playwright for every page in light and dark mode                                                                                                                                                   |
+| Suite              | Tool                         | What it covers                                                                                                                                                                                                                                                                                           |
+| ------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit + integration | Vitest, Testing Library, MSW | **127 tests**: the real routes and providers rendered against MSW handlers typed with the API's schemas (unhandled requests fail), plus pure logic (filters, variants, formatting, the auth client)                                                                                                      |
+| End-to-end         | Playwright                   | **20 tests** on the production build against a real, freshly seeded API: catalog, auth, full checkout paid through the real webhook, invoice, wishlist, cancellation, admin product creation, stock movements, order transitions, phone layout, and that anonymous visitors download no back-office code |
+| Accessibility      | axe-core                     | In unit tests and, with colour contrast, in Playwright for every page in light and dark mode                                                                                                                                                                                                             |
 
-Coverage of the unit/integration suite: **84.9% statements, 75.3% branches, 79.8% functions,
-86.2% lines**.
+Coverage of the unit/integration suite: **85.1% statements, 75.4% branches, 79.8% functions,
+86.3% lines**.
 
 ```bash
 npm test                 # unit + integration

@@ -96,6 +96,16 @@ describe('authentication', () => {
     expect(await screen.findByRole('link', { name: 'Sign in' })).toBeInTheDocument();
   });
 
+  it('tells the user when the server could not end the session (offline sign-out)', async () => {
+    signedInAs(customer);
+    server.use(http.post(url('/api/v1/auth/logout'), () => HttpResponse.error()));
+    const { user } = renderApp({ route: '/' });
+    await user.click(await screen.findByRole('button', { name: 'Carlos' }));
+    await user.click(within(screen.getByRole('menu')).getByRole('menuitem', { name: 'Sign out' }));
+    expect(await screen.findByText(/You are signed out on this device/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sign in' })).toBeInTheDocument();
+  });
+
   it('has accessible sign-in and sign-up forms', async () => {
     const { container, unmount } = renderApp({ route: '/login' });
     await screen.findByRole('heading', { level: 1, name: 'Sign in' });
