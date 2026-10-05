@@ -3,7 +3,7 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useId, type ReactNode } from 'react';
 
-interface AccountSectionProps {
+interface SectionCardProps {
   title: string;
   description?: string;
   action?: ReactNode;
@@ -11,7 +11,7 @@ interface AccountSectionProps {
 }
 
 /** A titled card that is also a labelled region, so screen readers can jump between sections. */
-export function AccountSection({ title, description, action, children }: AccountSectionProps) {
+export function SectionCard({ title, description, action, children }: SectionCardProps) {
   const headingId = useId();
   return (
     <Paper

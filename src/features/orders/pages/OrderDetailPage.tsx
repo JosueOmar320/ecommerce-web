@@ -30,6 +30,7 @@ import { OrderItems } from '../components/OrderItems';
 import { OrderProgress } from '../components/OrderProgress';
 import { OrderStatusChip } from '../components/OrderStatusChip';
 import { PaymentAttempts } from '../components/PaymentAttempts';
+import { StatusHistory } from '../components/StatusHistory';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -233,23 +234,7 @@ function OrderDetail({ order, back }: { order: Order; back: ReactNode }) {
               </Section>
             )}
             <Section title={t('orders.history')}>
-              <Box component="ol" sx={{ m: 0, pl: 2.5 }}>
-                {order.statusHistory.map((change) => (
-                  <Box component="li" key={change.createdAt + change.toStatus} sx={{ py: 0.5 }}>
-                    <Typography variant="body2">
-                      {t('orders.historyEntry', {
-                        status: t(`orders.status.${change.toStatus}`),
-                        date: formatDateTime(change.createdAt, i18n.language),
-                      })}
-                    </Typography>
-                    {change.reason && (
-                      <Typography variant="body2" color="textSecondary">
-                        {change.reason}
-                      </Typography>
-                    )}
-                  </Box>
-                ))}
-              </Box>
+              <StatusHistory history={order.statusHistory} />
             </Section>
           </Stack>
         </Grid>

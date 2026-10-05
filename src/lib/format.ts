@@ -56,6 +56,11 @@ export function decimalToCents(value: string): number {
   return Number(whole) * 100 + Number(fraction.padEnd(2, '0').slice(0, 2));
 }
 
+/** 49999 → "499.99", the editable form of a price (inverse of decimalToCents). */
+export function centsToDecimal(cents: number): string {
+  return `${Math.trunc(cents / 100)}.${String(cents % 100).padStart(2, '0')}`;
+}
+
 /** Currency symbol for input adornments, e.g. "$" for USD in en, "US$" in es. */
 export function currencySymbol(currency: string, locale: string): string {
   return (

@@ -4,6 +4,7 @@ import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { useQuery } from '@tanstack/react-query';
@@ -72,44 +73,51 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
       <Box component="nav" aria-label={t('nav.mainNavigation')}>
         <List>
           {links.map((link) => (
-            <ListItemButton
-              key={link.to}
-              component={NavLink}
-              to={link.to}
-              end={link.end}
-              onClick={onClose}
-              sx={{ py: 1.25, '&.active': { fontWeight: 700, bgcolor: 'action.selected' } }}
-            >
-              <ListItemText
-                primary={link.label}
-                slotProps={{ primary: { sx: { fontWeight: 'inherit' } } }}
-              />
-            </ListItemButton>
-          ))}
-          {signedIn ? (
-            <ListItemButton
-              onClick={async () => {
-                onClose();
-                await logout();
-                void navigate('/');
-              }}
-              sx={{ py: 1.25 }}
-            >
-              <ListItemText primary={t('nav.signOut')} secondary={user?.email} />
-            </ListItemButton>
-          ) : (
-            <>
-              <ListItemButton component={NavLink} to="/login" onClick={onClose} sx={{ py: 1.25 }}>
-                <ListItemText primary={t('nav.signIn')} />
-              </ListItemButton>
+            <ListItem key={link.to} disablePadding>
               <ListItemButton
                 component={NavLink}
-                to="/register"
+                to={link.to}
+                end={link.end}
                 onClick={onClose}
+                sx={{ py: 1.25, '&.active': { fontWeight: 700, bgcolor: 'action.selected' } }}
+              >
+                <ListItemText
+                  primary={link.label}
+                  slotProps={{ primary: { sx: { fontWeight: 'inherit' } } }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+          {signedIn ? (
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={async () => {
+                  onClose();
+                  await logout();
+                  void navigate('/');
+                }}
                 sx={{ py: 1.25 }}
               >
-                <ListItemText primary={t('nav.signUp')} />
+                <ListItemText primary={t('nav.signOut')} secondary={user?.email} />
               </ListItemButton>
+            </ListItem>
+          ) : (
+            <>
+              <ListItem disablePadding>
+                <ListItemButton component={NavLink} to="/login" onClick={onClose} sx={{ py: 1.25 }}>
+                  <ListItemText primary={t('nav.signIn')} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={NavLink}
+                  to="/register"
+                  onClick={onClose}
+                  sx={{ py: 1.25 }}
+                >
+                  <ListItemText primary={t('nav.signUp')} />
+                </ListItemButton>
+              </ListItem>
             </>
           )}
         </List>

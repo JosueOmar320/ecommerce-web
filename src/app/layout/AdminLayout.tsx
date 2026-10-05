@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -19,6 +20,9 @@ import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, Link as RouterLink } from 'react-router';
 import { MAIN_CONTENT_ID, SkipLink } from '@/components/SkipLink';
+import { ADMIN_SECTION_PERMISSION } from '@/features/auth/permissions';
+import { useSession } from '@/features/auth/session';
+import { AccountMenu } from './AccountMenu';
 import { AppScrollRestoration } from './AppScrollRestoration';
 import { NavigationProgress } from './NavigationProgress';
 import { PreferencesMenu } from './PreferencesMenu';
@@ -32,15 +36,39 @@ const SIDEBAR_WIDTH = 248;
 export function AdminLayout() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const { hasPermission } = useSession();
 
-  const items: { to: string; label: string; icon: ReactNode; end?: boolean }[] = [
-    { to: '/admin', label: t('admin.nav.dashboard'), icon: <Dashboard />, end: true },
-    { to: '/admin/products', label: t('admin.nav.products'), icon: <Storefront /> },
-    { to: '/admin/categories', label: t('admin.nav.categories'), icon: <Category /> },
-    { to: '/admin/inventory', label: t('admin.nav.inventory'), icon: <Inventory /> },
-    { to: '/admin/orders', label: t('admin.nav.orders'), icon: <Receipt /> },
-    { to: '/admin/users', label: t('admin.nav.users'), icon: <People /> },
+  const sections: {
+    to: string;
+    label: string;
+    icon: ReactNode;
+    end?: boolean;
+    visible: boolean;
+  }[] = [
+    {
+      to: '/admin',
+      label: t('admin.nav.dashboard'),
+      icon: <Dashboard />,
+      end: true,
+      visible: true,
+    },
+    ...(
+      [
+        ['products', <Storefront key="products" />],
+        ['categories', <Category key="categories" />],
+        ['inventory', <Inventory key="inventory" />],
+        ['orders', <Receipt key="orders" />],
+        ['users', <People key="users" />],
+      ] as const
+    ).map(([section, icon]) => ({
+      to: `/admin/${section}`,
+      label: t(`admin.nav.${section}`),
+      icon,
+      visible: hasPermission(ADMIN_SECTION_PERMISSION[section]),
+    })),
   ];
+  // Only sections this account can open; the routes enforce the same rule.
+  const items = sections.filter((item) => item.visible);
 
   const sidebar = (
     <Box
@@ -63,30 +91,36 @@ export function AdminLayout() {
       <Box component="nav" aria-label={t('admin.navigation')} sx={{ flex: 1 }}>
         <List dense sx={{ px: 1 }}>
           {items.map((item) => (
-            <ListItemButton
-              key={item.to}
-              component={NavLink}
-              to={item.to}
-              end={item.end}
-              onClick={() => {
-                setOpen(false);
-              }}
-              sx={{
-                borderRadius: 1,
-                mb: 0.25,
-                color: '#c9cfcc',
-                '& .MuiListItemIcon-root': { color: 'inherit', minWidth: 36 },
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.06)' },
-                '&.active': { bgcolor: 'rgba(92,198,171,0.16)', color: '#ffffff', fontWeight: 650 },
-                '&:focus-visible': { outline: '2px solid #5cc6ab', outlineOffset: -2 },
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText
-                primary={item.label}
-                slotProps={{ primary: { sx: { fontWeight: 'inherit', fontSize: '0.9rem' } } }}
-              />
-            </ListItemButton>
+            // <li> wrapper: a <ul> may only contain list items.
+            <ListItem key={item.to} disablePadding>
+              <ListItemButton
+                component={NavLink}
+                to={item.to}
+                end={item.end}
+                onClick={() => {
+                  setOpen(false);
+                }}
+                sx={{
+                  borderRadius: 1,
+                  mb: 0.25,
+                  color: '#c9cfcc',
+                  '& .MuiListItemIcon-root': { color: 'inherit', minWidth: 36 },
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.06)' },
+                  '&.active': {
+                    bgcolor: 'rgba(92,198,171,0.16)',
+                    color: '#ffffff',
+                    fontWeight: 650,
+                  },
+                  '&:focus-visible': { outline: '2px solid #5cc6ab', outlineOffset: -2 },
+                }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText
+                  primary={item.label}
+                  slotProps={{ primary: { sx: { fontWeight: 'inherit', fontSize: '0.9rem' } } }}
+                />
+              </ListItemButton>
+            </ListItem>
           ))}
         </List>
       </Box>
@@ -147,6 +181,7 @@ export function AdminLayout() {
           </IconButton>
           <Box sx={{ flex: 1 }} />
           <PreferencesMenu />
+          <AccountMenu />
         </Toolbar>
         <Box
           component="main"

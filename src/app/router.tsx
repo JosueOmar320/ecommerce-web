@@ -124,39 +124,82 @@ export const routes: RouteObject[] = [
                     ),
                   },
                   {
-                    path: 'products',
-                    lazy: page(
-                      () => import('@/features/admin/pages/AdminProductsPage'),
-                      'AdminProductsPage',
-                    ),
+                    element: <RequireAnyPermission anyOf={['products:read']} />,
+                    children: [
+                      {
+                        path: 'products',
+                        lazy: page(
+                          () => import('@/features/admin/pages/AdminProductsPage'),
+                          'AdminProductsPage',
+                        ),
+                      },
+                      {
+                        path: 'products/:productId',
+                        lazy: page(
+                          () => import('@/features/admin/pages/AdminProductEditorPage'),
+                          'AdminProductEditorPage',
+                        ),
+                      },
+                    ],
                   },
                   {
                     path: 'categories',
-                    lazy: page(
-                      () => import('@/features/admin/pages/AdminCategoriesPage'),
-                      'AdminCategoriesPage',
-                    ),
+                    element: <RequireAnyPermission anyOf={['categories:update']} />,
+                    children: [
+                      {
+                        index: true,
+                        lazy: page(
+                          () => import('@/features/admin/pages/AdminCategoriesPage'),
+                          'AdminCategoriesPage',
+                        ),
+                      },
+                    ],
                   },
                   {
                     path: 'inventory',
-                    lazy: page(
-                      () => import('@/features/admin/pages/AdminInventoryPage'),
-                      'AdminInventoryPage',
-                    ),
+                    element: <RequireAnyPermission anyOf={['inventory:read']} />,
+                    children: [
+                      {
+                        index: true,
+                        lazy: page(
+                          () => import('@/features/admin/pages/AdminInventoryPage'),
+                          'AdminInventoryPage',
+                        ),
+                      },
+                    ],
                   },
                   {
                     path: 'orders',
-                    lazy: page(
-                      () => import('@/features/admin/pages/AdminOrdersPage'),
-                      'AdminOrdersPage',
-                    ),
+                    element: <RequireAnyPermission anyOf={['orders:read']} />,
+                    children: [
+                      {
+                        index: true,
+                        lazy: page(
+                          () => import('@/features/admin/pages/AdminOrdersPage'),
+                          'AdminOrdersPage',
+                        ),
+                      },
+                      {
+                        path: ':orderId',
+                        lazy: page(
+                          () => import('@/features/admin/pages/AdminOrderDetailPage'),
+                          'AdminOrderDetailPage',
+                        ),
+                      },
+                    ],
                   },
                   {
                     path: 'users',
-                    lazy: page(
-                      () => import('@/features/admin/pages/AdminUsersPage'),
-                      'AdminUsersPage',
-                    ),
+                    element: <RequireAnyPermission anyOf={['users:read']} />,
+                    children: [
+                      {
+                        index: true,
+                        lazy: page(
+                          () => import('@/features/admin/pages/AdminUsersPage'),
+                          'AdminUsersPage',
+                        ),
+                      },
+                    ],
                   },
                   { path: '*', element: <NotFoundPage /> },
                 ],

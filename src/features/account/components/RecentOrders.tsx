@@ -7,7 +7,7 @@ import { AppLink } from '@/components/AppLink';
 import { ordersQuery } from '@/features/orders/api';
 import { OrderListItem } from '@/features/orders/components/OrderListItem';
 import { getErrorMessage } from '@/lib/errorMessage';
-import { AccountSection } from './AccountSection';
+import { SectionCard } from '@/components/SectionCard';
 
 const RECENT = 3;
 
@@ -16,7 +16,7 @@ export function RecentOrders() {
   const { t } = useTranslation();
   const orders = useQuery(ordersQuery({ page: 1 }));
   return (
-    <AccountSection title={t('profile.recentOrdersTitle')}>
+    <SectionCard title={t('profile.recentOrdersTitle')}>
       {orders.isPending ? (
         <Skeleton variant="rectangular" height={120} />
       ) : orders.isError ? (
@@ -35,6 +35,6 @@ export function RecentOrders() {
           </AppLink>
         </>
       )}
-    </AccountSection>
+    </SectionCard>
   );
 }

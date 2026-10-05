@@ -18,7 +18,7 @@ import { useNotify } from '@/components/Notifications';
 import { getErrorMessage } from '@/lib/errorMessage';
 import { addressesQuery, useCreateAddress, useDeleteAddress, useUpdateAddress } from '../api';
 import { formatAddress, toAddressForm } from '../formatAddress';
-import { AccountSection } from './AccountSection';
+import { SectionCard } from '@/components/SectionCard';
 import { AddressForm } from './AddressForm';
 
 type Editing = { mode: 'create' } | { mode: 'edit'; address: Address } | null;
@@ -41,7 +41,7 @@ export function AddressBook() {
   };
 
   return (
-    <AccountSection
+    <SectionCard
       title={t('profile.addressesTitle')}
       action={
         <Button
@@ -217,6 +217,6 @@ export function AddressBook() {
           });
         }}
       />
-    </AccountSection>
+    </SectionCard>
   );
 }
