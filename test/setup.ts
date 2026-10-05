@@ -37,7 +37,7 @@ const consoleError = console.error.bind(console);
 
 // Any request without a handler fails the test: no accidental calls to a real backend.
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
 });
 afterAll(() => {
   server.close();

@@ -50,8 +50,8 @@ describe('admin access', () => {
         .getAllByRole('link')
         .map((link) => link.textContent),
     ).toEqual(['Dashboard', 'Orders']);
-    // Only the order metrics are requested and shown.
-    const metrics = screen.getByRole('list', { name: 'Store metrics' });
+    // Only the order metrics are requested and shown (the page loads after the layout).
+    const metrics = await screen.findByRole('list', { name: 'Store metrics' });
     expect(await within(metrics).findByText('12')).toBeInTheDocument();
     expect(within(metrics).queryByText('Customers')).not.toBeInTheDocument();
   });
