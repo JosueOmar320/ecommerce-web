@@ -13,7 +13,10 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "api:sync": "node scripts/sync-openapi.mjs",
+    "api:generate": "openapi-typescript openapi/openapi.json -o src/api/schema.ts --root-types --root-types-no-schema-prefix",
+    "api:check": "npm run api:generate && git diff --exit-code -- src/api/schema.ts"
   },
   "author": "Josue Omar",
   "license": "UNLICENSED",
@@ -22,12 +25,15 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource-variable/inter": "^5.3.0",
+    "@hookform/resolvers": "^5.9.1",
     "@mui/icons-material": "^9.4.0",
     "@mui/material": "^9.4.0",
     "@tanstack/react-query": "^5.104.1",
     "i18next": "^26.4.2",
+    "openapi-fetch": "^0.17.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "react-hook-form": "^7.89.0",
     "react-i18next": "^17.0.15",
     "react-router": "^8.4.0",
     "zod": "^4.6.5"
@@ -49,6 +55,8 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
     "jsdom": "^29.1.1",
+    "msw": "^2.15.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.9",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.0",
@@ -58,5 +66,10 @@
   "private": true,
   "engines": {
     "node": ">=22.12"
+  },
+  "overrides": {
+    "openapi-typescript": {
+      "typescript": "$typescript"
+    }
   }
 }

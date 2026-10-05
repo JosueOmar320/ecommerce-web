@@ -1,0 +1,140 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
+import { onSessionExpired, refreshAccessToken } from '@/api/client';
+import type { CurrentUser, LoginRequest, Permission, RegisterRequest } from '@/api/schema';
+import { tokenStore } from '@/api/session';
+import {
+  authKeys,
+  clearUserData,
+  login as loginRequest,
+  logout as logoutRequest,
+  meQuery,
+  type NewSession,
+  register as registerRequest,
+} from './api';
+
+export type SessionStatus = 'loading' | 'authenticated' | 'anonymous';
+
+interface SessionContextValue {
+  status: SessionStatus;
+  user: CurrentUser | undefined;
+  /** True when the session ended on its own (expired/revoked), to explain the redirect to login. */
+  expired: boolean;
+  hasPermission: (...permissions: Permission[]) => boolean;
+  login: (body: LoginRequest) => Promise<CurrentUser>;
+  register: (body: RegisterRequest) => Promise<CurrentUser>;
+  logout: () => Promise<void>;
+}
+
+const SessionContext = createContext<SessionContextValue | null>(null);
+
+const channel =
+  typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('kestrel.session');
+type SessionMessage = { type: 'login' } | { type: 'logout' };
+
+export function SessionProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
+  const token = useSyncExternalStore(tokenStore.subscribe, tokenStore.get);
+  const [bootstrapping, setBootstrapping] = useState(true);
+  const [expired, setExpired] = useState(false);
+
+  // Restore the session from the httpOnly refresh cookie once per page load.
+  useEffect(() => {
+    let active = true;
+    refreshAccessToken()
+      .catch(() => null) // offline at startup: continue anonymously, requests will report errors
+      .finally(() => {
+        if (active) setBootstrapping(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(
+    () =>
+      onSessionExpired(() => {
+        clearUserData(queryClient);
+        setExpired(true);
+      }),
+    [queryClient],
+  );
+
+  // Keep tabs consistent: signing out in one tab signs out everywhere; signing in elsewhere is picked up.
+  useEffect(() => {
+    if (!channel) return;
+    const onMessage = (event: MessageEvent<SessionMessage>) => {
+      if (event.data.type === 'logout') {
+        tokenStore.set(null);
+        clearUserData(queryClient);
+      } else {
+        void refreshAccessToken();
+      }
+    };
+    channel.addEventListener('message', onMessage);
+    return () => {
+      channel.removeEventListener('message', onMessage);
+    };
+  }, [queryClient]);
+
+  const me = useQuery({ ...meQuery, enabled: token !== null });
+
+  const status: SessionStatus =
+    bootstrapping || (token !== null && me.isPending)
+      ? 'loading'
+      : token && me.data
+        ? 'authenticated'
+        : 'anonymous';
+
+  const begin = useCallback(
+    ({ accessToken, user }: NewSession) => {
+      clearUserData(queryClient); // never show a previous account's data
+      // Seed the user before exposing the token, so `me` does not refetch what login returned.
+      queryClient.setQueryData(authKeys.me, user);
+      tokenStore.set(accessToken);
+      setExpired(false);
+      channel?.postMessage({ type: 'login' } satisfies SessionMessage);
+      return user;
+    },
+    [queryClient],
+  );
+
+  const value = useMemo<SessionContextValue>(
+    () => ({
+      status,
+      user: token ? me.data : undefined,
+      expired,
+      hasPermission: (...permissions) =>
+        permissions.every((p) => me.data?.permissions.includes(p) ?? false),
+      login: async (body) => begin(await loginRequest(body)),
+      register: async (body) => begin(await registerRequest(body)),
+      logout: async () => {
+        try {
+          await logoutRequest();
+        } finally {
+          clearUserData(queryClient);
+          setExpired(false);
+          channel?.postMessage({ type: 'logout' } satisfies SessionMessage);
+        }
+      },
+    }),
+    [status, token, me.data, expired, begin, queryClient],
+  );
+
+  return <SessionContext value={value}>{children}</SessionContext>;
+}
+
+export function useSession(): SessionContextValue {
+  const context = use(SessionContext);
+  if (!context) throw new Error('useSession must be used inside <SessionProvider>');
+  return context;
+}

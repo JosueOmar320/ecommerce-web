@@ -3,6 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
+import { SessionProvider } from '@/features/auth/session';
 import { i18n } from '@/i18n';
 import { theme } from '@/theme/theme';
 
@@ -22,7 +23,9 @@ export function AppProviders({ queryClient, children }: AppProvidersProps) {
         disableTransitionOnChange
       >
         <CssBaseline enableColorScheme />
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <SessionProvider>{children}</SessionProvider>
+        </QueryClientProvider>
       </ThemeProvider>
     </I18nextProvider>
   );

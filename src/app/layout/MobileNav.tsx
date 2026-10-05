@@ -7,7 +7,9 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
+import { ADMIN_AREA_PERMISSIONS } from '@/features/auth/permissions';
+import { useSession } from '@/features/auth/session';
 import { Logo } from './Logo';
 import { PreferencesControls } from './PreferencesControls';
 
@@ -19,13 +21,23 @@ interface MobileNavProps {
 /** Full navigation on small screens: same destinations as desktop, adapted to touch. */
 export function MobileNav({ open, onClose }: MobileNavProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { status, user, hasPermission, logout } = useSession();
+  const signedIn = status === 'authenticated';
   const links = [
     { to: '/', label: t('nav.home'), end: true },
     { to: '/products', label: t('nav.allProducts') },
     { to: '/wishlist', label: t('nav.wishlist') },
     { to: '/cart', label: t('nav.cart') },
-    { to: '/orders', label: t('nav.orders') },
-    { to: '/profile', label: t('nav.profile') },
+    ...(signedIn
+      ? [
+          { to: '/orders', label: t('nav.orders') },
+          { to: '/profile', label: t('nav.profile') },
+          ...(ADMIN_AREA_PERMISSIONS.some((p) => hasPermission(p))
+            ? [{ to: '/admin', label: t('nav.admin') }]
+            : []),
+        ]
+      : []),
   ];
 
   return (
@@ -67,9 +79,32 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
               />
             </ListItemButton>
           ))}
-          <ListItemButton component={NavLink} to="/login" onClick={onClose} sx={{ py: 1.25 }}>
-            <ListItemText primary={t('nav.signIn')} />
-          </ListItemButton>
+          {signedIn ? (
+            <ListItemButton
+              onClick={async () => {
+                onClose();
+                await logout();
+                void navigate('/');
+              }}
+              sx={{ py: 1.25 }}
+            >
+              <ListItemText primary={t('nav.signOut')} secondary={user?.email} />
+            </ListItemButton>
+          ) : (
+            <>
+              <ListItemButton component={NavLink} to="/login" onClick={onClose} sx={{ py: 1.25 }}>
+                <ListItemText primary={t('nav.signIn')} />
+              </ListItemButton>
+              <ListItemButton
+                component={NavLink}
+                to="/register"
+                onClick={onClose}
+                sx={{ py: 1.25 }}
+              >
+                <ListItemText primary={t('nav.signUp')} />
+              </ListItemButton>
+            </>
+          )}
         </List>
       </Box>
       <Divider />

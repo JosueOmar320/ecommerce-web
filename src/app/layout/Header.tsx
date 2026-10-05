@@ -1,6 +1,5 @@
 import Favorite from '@mui/icons-material/FavoriteBorderOutlined';
 import Menu from '@mui/icons-material/MenuOutlined';
-import Person from '@mui/icons-material/PersonOutlineOutlined';
 import Search from '@mui/icons-material/SearchOutlined';
 import ShoppingBag from '@mui/icons-material/ShoppingBagOutlined';
 import AppBar from '@mui/material/AppBar';
@@ -15,6 +14,7 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Link as RouterLink } from 'react-router';
 import { layout } from '@/theme/theme';
+import { AccountMenu } from './AccountMenu';
 import { Logo } from './Logo';
 import { MobileNav } from './MobileNav';
 import { PreferencesMenu } from './PreferencesMenu';
@@ -111,14 +111,9 @@ export function Header() {
           <Box sx={{ display: { xs: 'none', md: 'block' } }}>
             <PreferencesMenu />
           </Box>
-          <Button
-            component={RouterLink}
-            to="/login"
-            startIcon={<Person />}
-            sx={{ display: { xs: 'none', md: 'inline-flex' }, color: 'text.primary' }}
-          >
-            {t('nav.signIn')}
-          </Button>
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <AccountMenu />
+          </Box>
         </Stack>
       </Toolbar>
 

@@ -40,6 +40,12 @@ export default tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
-  { files: ['**/*.js'], ...tseslint.configs.disableTypeChecked },
+  { files: ['**/*.{js,mjs}'], ...tseslint.configs.disableTypeChecked },
+  {
+    // Node scripts (OpenAPI sync, etc.): Node globals and console output are expected.
+    files: ['scripts/**'],
+    languageOptions: { globals: globals.node },
+    rules: { 'no-console': 'off' },
+  },
   prettier,
 );

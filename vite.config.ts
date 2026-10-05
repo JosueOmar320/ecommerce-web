@@ -25,6 +25,8 @@ export default defineConfig(({ command, mode }) => {
     preview: { port: 4173, strictPort: true },
     test: {
       environment: 'jsdom',
+      // Tests never depend on a local .env: they always talk to MSW at these addresses.
+      env: { VITE_API_URL: 'http://api.test', VITE_SITE_URL: 'http://shop.test' },
       setupFiles: ['./test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}', 'test/**/*.test.{ts,tsx}'],
       css: false,
