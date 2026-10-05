@@ -18,7 +18,7 @@ import { createOrder, orderKeys } from '@/features/orders/api';
 import { getErrorMessage } from '@/lib/errorMessage';
 import { formatMoney } from '@/lib/format';
 import { clearIdempotencyKey, getIdempotencyKey } from '@/lib/idempotency';
-import { formatAddress } from './ShippingStep';
+import { formatAddress } from '@/features/account/formatAddress';
 import { StepHeading } from './StepHeading';
 
 const ORDER_KEY_SCOPE = 'checkout-order';
@@ -83,13 +83,13 @@ export function ReviewStep({ addressId, onChangeAddress, onPlaced }: ReviewStepP
         sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mb: 3 }}
       >
         <div>
-          <Typography id="ship-to" variant="overline" component="h3" color="text.secondary">
+          <Typography id="ship-to" variant="overline" component="h3" color="textSecondary">
             {t('checkout.shipTo')}
           </Typography>
           {address ? (
             <>
               <Typography sx={{ fontWeight: 600 }}>{address.recipientName}</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 {formatAddress(address)}
               </Typography>
             </>
@@ -114,11 +114,11 @@ export function ReviewStep({ addressId, onChangeAddress, onPlaced }: ReviewStepP
               <Typography sx={{ fontWeight: 600 }}>
                 {item.productName} × {item.quantity}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 {item.variantName}
               </Typography>
               {item.issue && (
-                <Typography variant="body2" color="warning.main">
+                <Typography variant="body2" color="warning">
                   {item.issue === 'PRODUCT_UNAVAILABLE'
                     ? t('cart.issueUnavailable')
                     : t('cart.issueStock', { count: item.availableQuantity })}

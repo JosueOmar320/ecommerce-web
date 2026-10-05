@@ -7,7 +7,7 @@ import { Link as RouterLink, useLocation } from 'react-router';
  * Real links (not buttons) for each page: middle-click/open-in-new-tab works and crawlers can
  * follow them. Inside a <nav> landmark with an accessible name.
  */
-export function CatalogPagination({ page, totalPages }: { page: number; totalPages: number }) {
+export function LinkPagination({ page, totalPages }: { page: number; totalPages: number }) {
   const { t } = useTranslation();
   const location = useLocation();
   if (totalPages <= 1) return null;
@@ -23,7 +23,7 @@ export function CatalogPagination({ page, totalPages }: { page: number; totalPag
   return (
     <nav
       aria-label={t('common.pagination')}
-      style={{ display: 'flex', justifyContent: 'center', marginTop: 48 }}
+      style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}
     >
       <Pagination
         page={page}
@@ -33,11 +33,11 @@ export function CatalogPagination({ page, totalPages }: { page: number; totalPag
         getItemAriaLabel={(type, target, selected) =>
           type === 'page'
             ? selected
-              ? t('catalog.page', { page: target ?? 1 })
-              : t('catalog.goToPage', { page: target ?? 1 })
+              ? t('common.page', { page: target ?? 1 })
+              : t('common.goToPage', { page: target ?? 1 })
             : type === 'previous'
-              ? t('catalog.previousPage')
-              : t('catalog.nextPage')
+              ? t('common.previousPage')
+              : t('common.nextPage')
         }
         renderItem={(item) => (
           <PaginationItem component={RouterLink} to={hrefFor(item.page ?? 1)} {...item} />

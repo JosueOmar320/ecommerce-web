@@ -27,13 +27,16 @@ export type SessionStatus = 'loading' | 'authenticated' | 'anonymous';
 interface SessionContextValue {
   status: SessionStatus;
   user: CurrentUser | undefined;
-  /** True when the session ended on its own (expired/revoked), to explain the redirect to login. */
-  expired: boolean;
+  /** Why the last session ended without a plain sign-out, to explain the redirect to login. */
+  endReason: SessionEndReason | null;
   hasPermission: (...permissions: Permission[]) => boolean;
   login: (body: LoginRequest) => Promise<CurrentUser>;
   register: (body: RegisterRequest) => Promise<CurrentUser>;
-  logout: () => Promise<void>;
+  logout: (reason?: SessionEndReason) => Promise<void>;
 }
+
+/** `expired`: the refresh token is no longer valid. `passwordChanged`: the API revoked every session. */
+export type SessionEndReason = 'expired' | 'passwordChanged';
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
@@ -45,7 +48,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const token = useSyncExternalStore(tokenStore.subscribe, tokenStore.get);
   const [bootstrapping, setBootstrapping] = useState(true);
-  const [expired, setExpired] = useState(false);
+  const [endReason, setEndReason] = useState<SessionEndReason | null>(null);
 
   // Restore the session from the httpOnly refresh cookie once per page load.
   useEffect(() => {
@@ -64,7 +67,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     () =>
       onSessionExpired(() => {
         clearUserData(queryClient);
-        setExpired(true);
+        setEndReason('expired');
       }),
     [queryClient],
   );
@@ -101,7 +104,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       // Seed the user before exposing the token, so `me` does not refetch what login returned.
       queryClient.setQueryData(authKeys.me, user);
       tokenStore.set(accessToken);
-      setExpired(false);
+      setEndReason(null);
       channel?.postMessage({ type: 'login' } satisfies SessionMessage);
       return user;
     },
@@ -112,22 +115,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     () => ({
       status,
       user: token ? me.data : undefined,
-      expired,
+      endReason,
       hasPermission: (...permissions) =>
         permissions.every((p) => me.data?.permissions.includes(p) ?? false),
       login: async (body) => begin(await loginRequest(body)),
       register: async (body) => begin(await registerRequest(body)),
-      logout: async () => {
+      logout: async (reason) => {
         try {
           await logoutRequest();
         } finally {
           clearUserData(queryClient);
-          setExpired(false);
+          setEndReason(reason ?? null);
           channel?.postMessage({ type: 'logout' } satisfies SessionMessage);
         }
       },
     }),
-    [status, token, me.data, expired, begin, queryClient],
+    [status, token, me.data, endReason, begin, queryClient],
   );
 
   return <SessionContext value={value}>{children}</SessionContext>;

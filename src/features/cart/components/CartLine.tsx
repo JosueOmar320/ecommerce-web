@@ -69,7 +69,7 @@ export function CartLine({ item, currency, busy, onQuantity, onRemove }: CartLin
             {item.productName}
           </AppLink>
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="textSecondary">
           {item.variantName} · {item.sku}
         </Typography>
         <Typography variant="body2" sx={{ mt: 0.5 }}>

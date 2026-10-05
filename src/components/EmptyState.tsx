@@ -39,7 +39,7 @@ export function EmptyState({
         {title}
       </Typography>
       {description && (
-        <Typography color="text.secondary" sx={{ maxWidth: 440 }}>
+        <Typography color="textSecondary" sx={{ maxWidth: 440 }}>
           {description}
         </Typography>
       )}

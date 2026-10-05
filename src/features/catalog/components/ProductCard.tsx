@@ -57,7 +57,7 @@ export function ProductCard({ product, headingLevel = 'h3', action }: ProductCar
           <Typography
             variant="overline"
             component="p"
-            color="text.secondary"
+            color="textSecondary"
             sx={{ lineHeight: 1.4 }}
           >
             {product.brand}
@@ -96,7 +96,7 @@ export function ProductCard({ product, headingLevel = 'h3', action }: ProductCar
         >
           {price && <Typography sx={{ fontWeight: 600 }}>{price}</Typography>}
           {!product.inStock && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="textSecondary">
               {t('catalog.outOfStock')}
             </Typography>
           )}

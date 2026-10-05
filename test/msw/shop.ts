@@ -1,4 +1,4 @@
-import type { Address, Cart, CartItem, Order, Payment } from '@/api/schema';
+import type { Address, Cart, CartItem, Order, OrderSummary, Payment } from '@/api/schema';
 import { customer } from './fixtures';
 
 export const homeAddress: Address = {
@@ -126,3 +126,28 @@ export function payment(order: Order, overrides: Partial<Payment> = {}): Payment
     ...overrides,
   };
 }
+
+export function summaryOf(order: Order): OrderSummary {
+  return {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    currency: order.currency,
+    subtotalCents: order.subtotalCents,
+    shippingCents: order.shippingCents,
+    taxCents: order.taxCents,
+    totalCents: order.totalCents,
+    itemCount: order.itemCount,
+    customer: order.customer,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+  };
+}
+
+export const officeAddress: Address = {
+  ...homeAddress,
+  id: 'a1000000-0000-4000-8000-000000000002',
+  label: 'Office',
+  line1: 'Paseo de la Reforma 500',
+  isDefault: false,
+};

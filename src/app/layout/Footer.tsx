@@ -21,7 +21,7 @@ export function Footer() {
             <Typography variant="h6" component="h2" gutterBottom>
               {t('footer.about')}
             </Typography>
-            <Typography color="text.secondary" sx={{ maxWidth: 420 }}>
+            <Typography color="textSecondary" sx={{ maxWidth: 420 }}>
               {t('footer.aboutText')}
             </Typography>
           </Grid>
@@ -57,7 +57,7 @@ export function Footer() {
             </Stack>
           </Grid>
         </Grid>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 5 }}>
+        <Typography variant="body2" color="textSecondary" sx={{ mt: 5 }}>
           {t('footer.rights', { year: new Date().getFullYear() })}
         </Typography>
       </PageContainer>

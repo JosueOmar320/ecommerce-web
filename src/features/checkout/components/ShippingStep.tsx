@@ -10,25 +10,12 @@ import Typography from '@mui/material/Typography';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Address } from '@/api/schema';
 import { ErrorState } from '@/components/ErrorState';
 import { addressesQuery, useCreateAddress } from '@/features/account/api';
 import { AddressForm } from '@/features/account/components/AddressForm';
+import { formatAddress } from '@/features/account/formatAddress';
 import { getErrorMessage } from '@/lib/errorMessage';
 import { StepHeading } from './StepHeading';
-
-export function formatAddress(
-  address: Pick<Address, 'line1' | 'line2' | 'city' | 'state' | 'postalCode' | 'country'>,
-) {
-  return [
-    address.line1,
-    address.line2,
-    `${address.city}${address.state ? `, ${address.state}` : ''} ${address.postalCode}`,
-    address.country,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-}
 
 interface ShippingStepProps {
   selectedId: string | null;
@@ -92,7 +79,7 @@ export function ShippingStep({ selectedId, onContinue }: ShippingStepProps) {
                         <Chip size="small" label={t('checkout.default')} sx={{ ml: 1 }} />
                       )}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="textSecondary">
                       {formatAddress(address)}
                     </Typography>
                   </Box>
@@ -113,7 +100,7 @@ export function ShippingStep({ selectedId, onContinue }: ShippingStepProps) {
           }}
         >
           {list.length === 0 && (
-            <Typography color="text.secondary" sx={{ mb: 2 }}>
+            <Typography color="textSecondary" sx={{ mb: 2 }}>
               {t('checkout.noAddresses')}
             </Typography>
           )}

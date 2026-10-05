@@ -11,7 +11,7 @@ export function PlaceholderPage({ title }: { title: string }) {
     <PageContainer>
       <Seo title={title} index={false} />
       <PageHeader title={title} />
-      <Typography color="text.secondary">{t('placeholder.comingSoon')}</Typography>
+      <Typography color="textSecondary">{t('placeholder.comingSoon')}</Typography>
     </PageContainer>
   );
 }

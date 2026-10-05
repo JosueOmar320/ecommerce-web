@@ -22,7 +22,7 @@ import { countActiveFilters, SORTS, type ProductFilters, type Sort } from '../fi
 import { useProductFilters } from '../hooks/useProductFilters';
 import { WishlistButton } from '@/features/wishlist/components/WishlistButton';
 import { ActiveFilters } from './ActiveFilters';
-import { CatalogPagination } from './CatalogPagination';
+import { LinkPagination } from '@/components/LinkPagination';
 import { CatalogSearchField } from './CatalogSearchField';
 import { FilterPanel } from './FilterPanel';
 import { ProductCard } from './ProductCard';
@@ -135,7 +135,7 @@ export function ProductListing({ fixed, categoryNames }: ProductListingProps) {
         </Stack>
 
         {/* Announced politely whenever the results change (WCAG 4.1.3 status messages). */}
-        <Typography role="status" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography role="status" color="textSecondary" sx={{ mb: 2 }}>
           {query.isPending
             ? ' '
             : query.isFetching
@@ -201,10 +201,7 @@ export function ProductListing({ fixed, categoryNames }: ProductListingProps) {
                 </ProductGridItem>
               ))}
             </ProductGrid>
-            <CatalogPagination
-              page={query.data.meta.page}
-              totalPages={query.data.meta.totalPages}
-            />
+            <LinkPagination page={query.data.meta.page} totalPages={query.data.meta.totalPages} />
           </Box>
         )}
       </Box>

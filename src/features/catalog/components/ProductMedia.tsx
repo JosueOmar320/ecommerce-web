@@ -5,8 +5,8 @@ interface ProductMediaProps {
   seed: string;
   brand: string | null;
   name: string;
-  /** Larger type on the product page. */
-  size?: 'card' | 'hero';
+  /** `hero` on the product page; `thumb` for small list rows (initial only). */
+  size?: 'thumb' | 'card' | 'hero';
 }
 
 function hue(seed: string): number {
@@ -23,6 +23,29 @@ function hue(seed: string): number {
  */
 export function ProductMedia({ seed, brand, name, size = 'card' }: ProductMediaProps) {
   const h = hue(seed);
+  if (size === 'thumb') {
+    return (
+      <Box
+        aria-hidden
+        sx={(theme) => ({
+          aspectRatio: '4 / 5',
+          display: 'grid',
+          placeItems: 'center',
+          borderRadius: 1,
+          fontWeight: 700,
+          fontSize: '1.25rem',
+          bgcolor: `hsl(${h} 18% 92%)`,
+          color: `hsl(${h} 22% 28%)`,
+          ...theme.applyStyles('dark', {
+            bgcolor: `hsl(${h} 12% 16%)`,
+            color: `hsl(${h} 18% 78%)`,
+          }),
+        })}
+      >
+        {name.charAt(0)}
+      </Box>
+    );
+  }
   return (
     <Box
       aria-hidden

@@ -180,7 +180,7 @@ export function CartPage() {
             >
               {t('cart.checkout')}
             </Button>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>
               {t('cart.pricesNote')}
             </Typography>
           </Box>

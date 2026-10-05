@@ -21,7 +21,7 @@ export function ConfirmationStep({ orderId }: { orderId: string }) {
         <CheckCircle />
       </Box>
       <StepHeading>{t('checkout.confirmationTitle')}</StepHeading>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>
+      <Typography color="textSecondary" sx={{ mb: 3 }}>
         {t('checkout.confirmationBody', { number: order.data.orderNumber })}
       </Typography>
       <Box sx={{ maxWidth: 420, mb: 4 }}>

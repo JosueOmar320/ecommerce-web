@@ -43,7 +43,7 @@ function SectionHeader({
           {title}
         </Typography>
         {description && (
-          <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+          <Typography color="textSecondary" sx={{ mt: 0.5 }}>
             {description}
           </Typography>
         )}
@@ -81,7 +81,7 @@ export function HomePage() {
           <Typography id="hero-title" variant="h1" sx={{ mt: 1 }}>
             {t('home.heroTitle')}
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary" sx={{ mt: 2.5, maxWidth: 600 }}>
+          <Typography variant="subtitle1" color="textSecondary" sx={{ mt: 2.5, maxWidth: 600 }}>
             {t('home.heroBody')}
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 4 }}>
@@ -133,7 +133,7 @@ export function HomePage() {
                       </Typography>
                       <div>
                         {category.description && (
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" color="textSecondary">
                             {category.description}
                           </Typography>
                         )}

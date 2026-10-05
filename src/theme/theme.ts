@@ -40,6 +40,8 @@ const shared: ThemeOptions = {
     button: { textTransform: 'none', fontWeight: 600, letterSpacing: 0 },
   },
   components: {
+    // Gap instead of child margins: wrapped rows stay aligned (no stray offset on the new line).
+    MuiStack: { defaultProps: { useFlexGap: true } },
     MuiCssBaseline: {
       styleOverrides: {
         'html, body, #root': { minHeight: '100%' },

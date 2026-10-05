@@ -124,7 +124,7 @@ export function WishlistPage() {
                     justifyContent: 'space-between',
                   }}
                 >
-                  <Typography color="text.secondary">{t('wishlist.unavailable')}</Typography>
+                  <Typography color="textSecondary">{t('wishlist.unavailable')}</Typography>
                   <Button
                     onClick={() => {
                       toggle.mutate({ productId: item.productId, saved: true });

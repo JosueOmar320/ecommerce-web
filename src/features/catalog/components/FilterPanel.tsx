@@ -36,7 +36,7 @@ function Section({
         id={labelId}
         variant="overline"
         component="h2"
-        color="text.secondary"
+        color="textSecondary"
         sx={{ display: 'block', mb: 1 }}
       >
         {title}

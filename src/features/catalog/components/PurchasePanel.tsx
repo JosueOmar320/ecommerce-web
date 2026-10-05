@@ -50,7 +50,7 @@ export function PurchasePanel({ product, variant }: PurchasePanelProps) {
         </Typography>
         {variant?.compareAtPriceCents && discount !== null && (
           <>
-            <Typography color="text.secondary" sx={{ textDecoration: 'line-through' }}>
+            <Typography color="textSecondary" sx={{ textDecoration: 'line-through' }}>
               <Box component="span" sx={visuallyHidden}>
                 {t('product.compareAt', { price: '' })}
               </Box>
@@ -139,7 +139,7 @@ export function PurchasePanel({ product, variant }: PurchasePanelProps) {
         )}
       </Stack>
       {canBuy && max === MAX_PER_LINE && qty === max && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
           {t('product.maxPerOrder', { count: MAX_PER_LINE })}
         </Typography>
       )}

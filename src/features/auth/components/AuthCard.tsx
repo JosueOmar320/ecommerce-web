@@ -18,7 +18,7 @@ export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
         <Typography variant="h2" component="h1">
           {title}
         </Typography>
-        <Typography color="text.secondary" sx={{ mt: 1, mb: 4 }}>
+        <Typography color="textSecondary" sx={{ mt: 1, mb: 4 }}>
           {subtitle}
         </Typography>
         {children}

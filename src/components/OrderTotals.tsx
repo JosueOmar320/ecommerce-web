@@ -34,7 +34,7 @@ export function OrderTotals({
       <Typography
         component="dt"
         sx={{ fontWeight: strong ? 650 : 400 }}
-        color={strong ? 'text.primary' : 'text.secondary'}
+        color={strong ? 'textPrimary' : 'textSecondary'}
       >
         {label}
       </Typography>

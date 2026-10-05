@@ -68,7 +68,7 @@ export function RegisterPage() {
       title={t('auth.signUpTitle')}
       subtitle={t('auth.signUpSubtitle')}
       footer={
-        <Typography color="text.secondary">
+        <Typography color="textSecondary">
           {t('auth.haveAccount')}{' '}
           <AppLink
             to={`/login${params.get('redirect') ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}

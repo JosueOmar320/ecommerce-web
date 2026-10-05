@@ -131,7 +131,7 @@ export function ProductDetailPage() {
             {t('nav.allProducts')}
           </AppLink>
         )}
-        <Typography color="text.primary" aria-current="page">
+        <Typography color="textPrimary" aria-current="page">
           {product.name}
         </Typography>
       </Breadcrumbs>
@@ -185,7 +185,7 @@ export function ProductDetailPage() {
             {t('product.description')}
           </Typography>
           {/* Rendered as text: product content is never injected as HTML. */}
-          <Typography color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+          <Typography color="textSecondary" sx={{ whiteSpace: 'pre-line' }}>
             {product.description}
           </Typography>
 
@@ -204,7 +204,7 @@ export function ProductDetailPage() {
           >
             {variant && (
               <>
-                <Typography component="dt" color="text.secondary">
+                <Typography component="dt" color="textSecondary">
                   {t('product.sku')}
                 </Typography>
                 <Typography
@@ -217,7 +217,7 @@ export function ProductDetailPage() {
             )}
             {product.categories.length > 0 && (
               <>
-                <Typography component="dt" color="text.secondary">
+                <Typography component="dt" color="textSecondary">
                   {t('product.categories')}
                 </Typography>
                 <Box component="dd" sx={{ m: 0 }}>

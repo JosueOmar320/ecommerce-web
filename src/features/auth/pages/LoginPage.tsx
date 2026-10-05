@@ -23,7 +23,7 @@ export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { status, login, expired } = useSession();
+  const { status, login, endReason } = useSession();
   const redirectTo = safeRedirect(params.get('redirect'));
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -56,7 +56,7 @@ export function LoginPage() {
       title={t('auth.signInTitle')}
       subtitle={t('auth.signInSubtitle')}
       footer={
-        <Typography color="text.secondary">
+        <Typography color="textSecondary">
           {t('auth.noAccount')}{' '}
           <AppLink
             to={`/register${params.get('redirect') ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}
@@ -67,12 +67,12 @@ export function LoginPage() {
       }
     >
       <Seo title={t('auth.signInTitle')} index={false} />
-      {expired && !formError && (
+      {endReason && !formError && (
         <Alert severity="info" variant="outlined" sx={{ mb: 2.5 }}>
-          {t('auth.sessionExpired')}
+          {endReason === 'passwordChanged' ? t('auth.passwordChanged') : t('auth.sessionExpired')}
         </Alert>
       )}
-      {!expired && params.has('redirect') && !formError && (
+      {!endReason && params.has('redirect') && !formError && (
         <Alert severity="info" variant="outlined" sx={{ mb: 2.5 }}>
           {t('auth.signInRequired')}
         </Alert>
@@ -105,7 +105,7 @@ export function LoginPage() {
       </form>
 
       {import.meta.env.DEV && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
+        <Typography variant="body2" color="textSecondary" sx={{ mt: 3 }}>
           {t('auth.devCredentials')}
         </Typography>
       )}

@@ -24,7 +24,7 @@ export function PreferencesControls() {
   return (
     <Stack spacing={2.5}>
       <div>
-        <Typography id="pref-theme" variant="overline" component="p" color="text.secondary">
+        <Typography id="pref-theme" variant="overline" component="p" color="textSecondary">
           {t('preferences.theme')}
         </Typography>
         <ToggleButtonGroup
@@ -52,7 +52,7 @@ export function PreferencesControls() {
         </ToggleButtonGroup>
       </div>
       <div>
-        <Typography id="pref-language" variant="overline" component="p" color="text.secondary">
+        <Typography id="pref-language" variant="overline" component="p" color="textSecondary">
           {t('preferences.language')}
         </Typography>
         <ToggleButtonGroup

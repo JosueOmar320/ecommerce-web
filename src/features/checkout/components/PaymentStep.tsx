@@ -119,7 +119,7 @@ export function PaymentStep({ orderId, onConfirmed }: PaymentStepProps) {
       </Alert>
 
       {data.expiresAt && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
           {t('checkout.payBefore', {
             time: new Intl.DateTimeFormat(i18n.language, { timeStyle: 'short' }).format(
               new Date(data.expiresAt),
