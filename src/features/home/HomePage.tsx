@@ -19,6 +19,7 @@ import {
   ProductGridSkeleton,
 } from '@/features/catalog/components/ProductGrid';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { RecentlyViewed } from './RecentlyViewed';
 
 const NEW_ARRIVALS = { sort: 'newest' } as const;
 
@@ -177,6 +178,7 @@ export function HomePage() {
             </ProductGrid>
           )}
         </Box>
+        <RecentlyViewed />
       </PageContainer>
     </>
   );

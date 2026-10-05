@@ -20,6 +20,7 @@ import { currencySymbol, decimalToCents, formatMoney } from '@/lib/format';
 import { productListQuery } from '../api';
 import { countActiveFilters, SORTS, type ProductFilters, type Sort } from '../filters';
 import { useProductFilters } from '../hooks/useProductFilters';
+import { WishlistButton } from '@/features/wishlist/components/WishlistButton';
 import { ActiveFilters } from './ActiveFilters';
 import { CatalogPagination } from './CatalogPagination';
 import { CatalogSearchField } from './CatalogSearchField';
@@ -192,7 +193,11 @@ export function ProductListing({ fixed, categoryNames }: ProductListingProps) {
             <ProductGrid>
               {query.data.data.map((product) => (
                 <ProductGridItem key={product.id}>
-                  <ProductCard product={product} headingLevel="h2" />
+                  <ProductCard
+                    product={product}
+                    headingLevel="h2"
+                    action={<WishlistButton product={product} overlay size="small" />}
+                  />
                 </ProductGridItem>
               ))}
             </ProductGrid>

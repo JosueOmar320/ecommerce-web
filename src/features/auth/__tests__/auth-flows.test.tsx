@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { admin, customer } from '../../../../test/msw/fixtures';
 import { apiError, http, HttpResponse, url } from '../../../../test/msw/http';
 import { server } from '../../../../test/msw/server';
+import { signedInAs } from '../../../../test/msw/session';
 import { expectNoAxeViolations } from '../../../../test/utils/axe';
 import { renderApp } from '../../../../test/utils/render';
 
@@ -12,18 +13,6 @@ const session = (user = customer) => ({
   expiresIn: 900,
   user,
 });
-
-/** A visitor whose browser holds a valid refresh cookie for `user`. */
-function signedInAs(user = customer) {
-  server.use(
-    http.post(url('/api/v1/auth/refresh'), () =>
-      HttpResponse.json({
-        data: { accessToken: `token-${user.id}`, tokenType: 'Bearer', expiresIn: 900 },
-      }),
-    ),
-    http.get(url('/api/v1/auth/me'), () => HttpResponse.json({ data: user })),
-  );
-}
 
 describe('authentication', () => {
   it('signs in and continues to the page that required it', async () => {

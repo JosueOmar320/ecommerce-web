@@ -3,6 +3,7 @@ import Menu from '@mui/icons-material/MenuOutlined';
 import Search from '@mui/icons-material/SearchOutlined';
 import ShoppingBag from '@mui/icons-material/ShoppingBagOutlined';
 import AppBar from '@mui/material/AppBar';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
@@ -14,6 +15,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Link as RouterLink } from 'react-router';
+import { useSession } from '@/features/auth/session';
+import { cartQuery } from '@/features/cart/api';
 import { categoriesQuery } from '@/features/catalog/api';
 import { layout } from '@/theme/theme';
 import { AccountMenu } from './AccountMenu';
@@ -35,6 +38,10 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
   const categories = useQuery(categoriesQuery);
+  const { status } = useSession();
+  // Cart count comes from the same cached query the cart page uses (no extra endpoint).
+  const cart = useQuery({ ...cartQuery, enabled: status === 'authenticated', staleTime: 30_000 });
+  const cartCount = status === 'authenticated' ? (cart.data?.itemCount ?? 0) : 0;
 
   return (
     <AppBar
@@ -116,9 +123,15 @@ export function Header() {
               <Favorite />
             </IconButton>
           </Tooltip>
-          <Tooltip title={t('nav.cart')}>
-            <IconButton component={RouterLink} to="/cart" aria-label={t('nav.cart')}>
-              <ShoppingBag />
+          <Tooltip title={t('nav.cart')} describeChild>
+            <IconButton
+              component={RouterLink}
+              to="/cart"
+              aria-label={cartCount ? t('nav.cartWithCount', { count: cartCount }) : t('nav.cart')}
+            >
+              <Badge badgeContent={cartCount} color="primary" max={99}>
+                <ShoppingBag />
+              </Badge>
             </IconButton>
           </Tooltip>
           <Box sx={{ display: { xs: 'none', md: 'block' } }}>
